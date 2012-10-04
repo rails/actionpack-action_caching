@@ -5,8 +5,8 @@ Gem::Specification.new do |gem|
   gem.version       = '0.0.1'
   gem.authors       = 'David Heinemeier Hansson'
   gem.email         = 'david@loudthinking.com'
-  gem.description   = 'Action caching'
-  gem.summary       = 'Action caching'
+  gem.description   = 'Action caching for Action Pack (removed from core in Rails 4.0)'
+  gem.summary       = 'Action caching for Action Pack (removed from core in Rails 4.0)'
   gem.homepage      = 'https://github.com/rails/actionpack-action_caching'
 
   gem.files         = `git ls-files`.split($/)
