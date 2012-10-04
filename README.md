@@ -28,16 +28,16 @@ that filters run before the cache is served, which allows for
 authentication and other restrictions on whether someone is allowed
 to execute such action.
 
-  class ListsController < ApplicationController
-    before_filter :authenticate, except: :public
+    class ListsController < ApplicationController
+      before_filter :authenticate, except: :public
 
-    caches_page   :public
-    caches_action :index, :show
-  end
+      caches_page   :public
+      caches_action :index, :show
+    end
 
-In this example, the +public+ action doesn't require authentication
+In this example, the `public` action doesn't require authentication
 so it's possible to use the faster page caching. On the other hand
-+index+ and +show+ require authentication. They can still be cached,
+`index` and `show` require authentication. They can still be cached,
 but we need action caching for them.
 
 Action caching uses fragment caching internally and an around
@@ -71,26 +71,26 @@ interval (in seconds) to schedule expiration of the cached item.
 
 The following example depicts some of the points made above:
 
-  class ListsController < ApplicationController
-    before_filter :authenticate, except: :public
+    class ListsController < ApplicationController
+      before_filter :authenticate, except: :public
 
-    caches_page :public
+      caches_page :public
 
-    caches_action :index, if: Proc.new do
-      !request.format.json?  # cache if is not a JSON request
-    end
+      caches_action :index, if: Proc.new do
+        !request.format.json?  # cache if is not a JSON request
+      end
 
-    caches_action :show, cache_path: { project: 1 },
-      expires_in: 1.hour
+      caches_action :show, cache_path: { project: 1 },
+        expires_in: 1.hour
 
-    caches_action :feed, cache_path: Proc.new do
-      if params[:user_id]
-        user_list_url(params[:user_id, params[:id])
-      else
-        list_url(params[:id])
+      caches_action :feed, cache_path: Proc.new do
+        if params[:user_id]
+          user_list_url(params[:user_id, params[:id])
+        else
+          list_url(params[:id])
+        end
       end
     end
-  end
 
 If you pass `layout: false`, it will only cache your action
 content. That's useful when your layout has dynamic information.
