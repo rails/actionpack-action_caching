@@ -115,6 +115,10 @@ module ActionController
         end
       end
 
+      def caching_allowed?
+        (request.get? || request.head?) && response.status == 200
+      end
+
     protected
       def expire_action(options = {})
         return unless cache_configured?

@@ -153,6 +153,18 @@ class ActionCacheTest < ActionController::TestCase
     FileUtils.rm_rf(File.dirname(FILE_STORE_PATH))
   end
 
+  def test_simple_action_cache_with_http_head
+    head :index
+    assert_response :success
+    cached_time = content_to_cache
+    assert_equal cached_time, @response.body
+    assert fragment_exist?('hostname.com/action_caching_test')
+
+    head :index
+    assert_response :success
+    assert_equal cached_time, @response.body
+  end
+
   def test_simple_action_cache
     get :index
     assert_response :success
