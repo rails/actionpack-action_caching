@@ -10,6 +10,12 @@ class CachingController < ActionController::Base
   self.cache_store = :file_store, FILE_STORE_PATH
 end
 
+class CachePath
+  def call(controller)
+    ['controller', controller.params[:id]].compact.join('-')
+  end
+end
+
 class ActionCachingTestController < CachingController
   rescue_from(Exception) { head 500 }
   rescue_from(ActionController::UnknownFormat) { head :not_acceptable }
@@ -23,6 +29,7 @@ class ActionCachingTestController < CachingController
   caches_action :index, :redirected, :forbidden, if: Proc.new { |c| c.request.format && !c.request.format.json? }, expires_in: 1.hour
   caches_action :show, cache_path: 'http://test.host/custom/show'
   caches_action :edit, cache_path: Proc.new { |c| c.params[:id] ? "http://test.host/#{c.params[:id]};edit" : 'http://test.host/edit' }
+  caches_action :custom_cache_path, cache_path: CachePath.new
   caches_action :with_layout
   caches_action :with_format_and_http_param, cache_path: Proc.new { |c| { key: 'value' } }
   caches_action :layout_false, layout: false
@@ -73,6 +80,7 @@ class ActionCachingTestController < CachingController
   alias_method :show, :index
   alias_method :edit, :index
   alias_method :destroy, :index
+  alias_method :custom_cache_path, :index
   alias_method :layout_false, :with_layout
   alias_method :with_layout_proc_param, :with_layout
 
@@ -289,6 +297,16 @@ class ActionCacheTest < ActionController::TestCase
     get :edit, id: 1
     assert_response :success
     assert fragment_exist?('test.host/1;edit')
+  end
+
+  def test_action_cache_with_custom_cache_path_with_custom_object
+    get :custom_cache_path
+    assert_response :success
+    assert fragment_exist?('controller')
+
+    get :custom_cache_path, id: 1
+    assert_response :success
+    assert fragment_exist?('controller-1')
   end
 
   def test_cache_expiration

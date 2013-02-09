@@ -43,6 +43,8 @@ module ActionController
     # <tt>ActionCachePath.new</tt>. This is handy for actions with
     # multiple possible routes that should be cached differently. If a
     # block is given, it is called with the current controller instance.
+    # If a object is given, it is called <tt>call</tt> method with the
+    # current controller instance.
     #
     # And you can also use <tt>:if</tt> (or <tt>:unless</tt>) to pass a
     # proc that specifies when the action should be cached.
@@ -51,6 +53,16 @@ module ActionController
     # interval (in seconds) to schedule expiration of the cached item.
     #
     # The following example depicts some of the points made above:
+    #   class CachePathCreator
+    #     def initialize(name)
+    #       @name = name
+    #     end
+    #
+    #     def call(controller)
+    #       "cache-path-#{@name}"
+    #     end
+    #   end
+    #
     #
     #   class ListsController < ApplicationController
     #     before_filter :authenticate, except: :public
@@ -71,6 +83,8 @@ module ActionController
     #         list_url(params[:id])
     #       end
     #     end
+    #
+    #     caches_action :posts, cache_path: CachePathCreator.new('posts')
     #   end
     #
     # If you pass <tt>layout: false</tt>, it will only cache your action
@@ -139,8 +153,10 @@ module ActionController
         def around(controller)
           cache_layout = @cache_layout.respond_to?(:call) ? @cache_layout.call(controller) : @cache_layout
 
-          path_options = if @cache_path.respond_to?(:call)
+          path_options = if @cache_path.is_a?(Proc)
             controller.instance_exec(controller, &@cache_path)
+          elsif @cache_path.respond_to?(:call)
+            @cache_path.call(controller)
           else
             @cache_path
           end
