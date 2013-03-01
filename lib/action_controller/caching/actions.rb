@@ -43,8 +43,8 @@ module ActionController
     # <tt>ActionCachePath.new</tt>. This is handy for actions with
     # multiple possible routes that should be cached differently. If a
     # block is given, it is called with the current controller instance.
-    # If a object is given, it is called <tt>call</tt> method with the
-    # current controller instance.
+    # If an object that responds to <tt>call</tt> is given, it'll be called
+    # with the current controller instance.
     #
     # And you can also use <tt>:if</tt> (or <tt>:unless</tt>) to pass a
     # proc that specifies when the action should be cached.
@@ -53,6 +53,7 @@ module ActionController
     # interval (in seconds) to schedule expiration of the cached item.
     #
     # The following example depicts some of the points made above:
+    #
     #   class CachePathCreator
     #     def initialize(name)
     #       @name = name
