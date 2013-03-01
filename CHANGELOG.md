@@ -1,6 +1,7 @@
 ## unreleased
 
-*   Allow to use non-proc object in `cache_path` option.
+*   Allow to use non-proc object in `cache_path` option. You can pass an object that
+    responds to a `call` method.
 
     Example:
 
