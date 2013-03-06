@@ -113,3 +113,9 @@ Contributing
 3. Commit your changes (`git commit -am 'Add some feature'`).
 4. Push to the branch (`git push origin my-new-feature`).
 5. Create a new Pull Request.
+
+Code Status
+-----------
+
+* [![Build Status](https://travis-ci.org/rails/actionpack-action_caching.png?branch=master)](https://travis-ci.org/rails/actionpack-action_caching)
+* [![Dependency Status](https://gemnasium.com/rails/actionpack-action_caching.png)](https://gemnasium.com/rails/actionpack-action_caching)
