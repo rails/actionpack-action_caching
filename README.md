@@ -1,4 +1,4 @@
-actionpack-action_caching
+actionpack-action_caching [![Build Status](https://travis-ci.org/rails/actionpack-action_caching.png?branch=master)](https://travis-ci.org/rails/actionpack-action_caching) [![Dependency Status](https://gemnasium.com/rails/actionpack-action_caching.png)](https://gemnasium.com/rails/actionpack-action_caching)
 =========================
 
 Action caching for Action Pack (removed from core in Rails 4.0)
