@@ -36,7 +36,7 @@ module ActionController
     # are treated like separate requests and so are cached separately.
     # Keep in mind when expiring an action cache that
     # <tt>action: 'lists'</tt> is not the same as
-    # <tt>action: 'list', format: :xml</tt>.
+    # <tt>action: 'lists', format: :xml</tt>.
     #
     # You can modify the default action cache path by passing a
     # <tt>:cache_path</tt> option. This will be passed directly to
