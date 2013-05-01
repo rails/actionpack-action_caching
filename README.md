@@ -1,7 +1,9 @@
 actionpack-action_caching
 =========================
 
-Action caching for Action Pack (removed from core in Rails 4.0)
+Action caching for Action Pack (removed from core in Rails 4.0).
+
+**NOTE:** It will continue to be maintained until Rails 5.
 
 Installation
 ------------
