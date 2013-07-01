@@ -87,7 +87,7 @@ The following example depicts some of the points made above:
 
       caches_action :feed, cache_path: Proc.new do
         if params[:user_id]
-          user_list_url(params[:user_id, params[:id])
+          user_list_url(params[:user_id], params[:id])
         else
           list_url(params[:id])
         end
