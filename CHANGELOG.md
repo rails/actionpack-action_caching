@@ -1,4 +1,4 @@
-## unreleased
+## 1.1.0
 
 *   Allow to use non-proc object in `cache_path` option. You can pass an object that
     responds to a `call` method.
