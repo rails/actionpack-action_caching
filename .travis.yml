@@ -8,6 +8,9 @@ gemfile:
   - Gemfile
   - gemfiles/Gemfile-edge
   - gemfiles/Gemfile-4-0-stable
+matrix:
+  allow_failures:
+    - gemfile: gemfiles/Gemfile-edge
 notifications:
   email: false
   irc:
