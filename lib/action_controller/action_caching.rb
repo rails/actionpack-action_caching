@@ -1,3 +1,5 @@
+require 'action_controller/caching/actions'
+
 module ActionController
   module Caching
     eager_autoload do
@@ -7,3 +9,5 @@ module ActionController
     include Actions
   end
 end
+
+ActionController::Base.send(:include, ActionController::Caching::Actions)
