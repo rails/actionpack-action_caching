@@ -26,12 +26,17 @@ class ActionCachingTestController < CachingController
   # Eliminate uninitialized ivar warning
   before_filter { @title = nil }
 
+  before_filter only: :with_symbol_format do
+    request.params[:format] = :json
+  end
+
   caches_action :index, :redirected, :forbidden, if: Proc.new { |c| c.request.format && !c.request.format.json? }, expires_in: 1.hour
   caches_action :show, cache_path: 'http://test.host/custom/show'
   caches_action :edit, cache_path: Proc.new { |c| c.params[:id] ? "http://test.host/#{c.params[:id]};edit" : 'http://test.host/edit' }
   caches_action :custom_cache_path, cache_path: CachePath.new
   caches_action :with_layout
   caches_action :with_format_and_http_param, cache_path: Proc.new { |c| { key: 'value' } }
+  caches_action :with_symbol_format, cache_path: 'http://test.host/action_caching_test/with_symbol_format'
   caches_action :layout_false, layout: false
   caches_action :with_layout_proc_param, layout: Proc.new { |c| c.params[:layout] }
   caches_action :record_not_found, :four_oh_four, :simple_runtime_error
@@ -63,6 +68,11 @@ class ActionCachingTestController < CachingController
   def with_format_and_http_param
     @cache_this = MockTime.now.to_f.to_s
     render text: @cache_this
+  end
+
+  def with_symbol_format
+    @cache_this = MockTime.now.to_f.to_s
+    render json: { timestamp: @cache_this }
   end
 
   def record_not_found
@@ -267,6 +277,13 @@ class ActionCacheTest < ActionController::TestCase
     assert_response :success
     assert !fragment_exist?('hostname.com/action_caching_test/with_format_and_http_param.json?key=value.json')
     assert fragment_exist?('hostname.com/action_caching_test/with_format_and_http_param.json?key=value')
+  end
+
+  def test_action_cache_with_symbol_format
+    get :with_symbol_format
+    assert_response :success
+    assert !fragment_exist?('test.host/action_caching_test/with_symbol_format')
+    assert fragment_exist?('test.host/action_caching_test/with_symbol_format.json')
   end
 
   def test_action_cache_with_store_options

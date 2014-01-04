@@ -1,8 +1,16 @@
+*   Call `to_s` on the extension as it may be a symbol
+
+    Fixes #10
+
+    *Andrew White*
+
+## 1.1.1 (January 2, 2014)
+
 *   Fix load order problem with other gems
 
     *Andrew White*
 
-## 1.1.0
+## 1.1.0 (November 1, 2013)
 
 *   Allow to use non-proc object in `cache_path` option. You can pass an object that
     responds to a `call` method.
