@@ -30,6 +30,8 @@ that filters run before the cache is served, which allows for
 authentication and other restrictions on whether someone is allowed
 to execute such action.
 
+    require 'actionpack/action_caching'
+
     class ListsController < ApplicationController
       before_filter :authenticate, except: :public
 
@@ -72,6 +74,8 @@ As of Rails 3.0, you can also pass `:expires_in` with a time
 interval (in seconds) to schedule expiration of the cached item.
 
 The following example depicts some of the points made above:
+
+    require 'actionpack/action_caching'
 
     class ListsController < ApplicationController
       before_filter :authenticate, except: :public
