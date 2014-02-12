@@ -1,1 +1,1 @@
-require 'action_controller/action_caching'
+require 'actionpack/action_caching/railtie'
