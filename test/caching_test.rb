@@ -42,6 +42,7 @@ class ActionCachingTestController < CachingController
   caches_action :record_not_found, :four_oh_four, :simple_runtime_error
   caches_action :streaming
   caches_action :invalid
+  caches_action :overwrite, overwrite_key: 'no_cache'
 
   layout 'talk_from_action'
 
@@ -93,6 +94,7 @@ class ActionCachingTestController < CachingController
   alias_method :custom_cache_path, :index
   alias_method :layout_false, :with_layout
   alias_method :with_layout_proc_param, :with_layout
+  alias_method :overwrite, :index
 
   def expire
     expire_action controller: 'action_caching_test', action: 'index'
@@ -527,6 +529,20 @@ class ActionCacheTest < ActionController::TestCase
 
     get :invalid, format: '\xC3\x83'
     assert_response :not_acceptable
+  end
+
+  def test_action_cache_with_overwrite_key
+    get :overwrite
+    assert_response :success
+    assert fragment_exist?('hostname.com/action_caching_test/overwrite')
+    body1 = @response.body
+
+    get :overwrite, no_cache: 1
+    assert_response :success
+    assert fragment_exist?('hostname.com/action_caching_test/overwrite')
+    body2 = @response.body
+
+    assert_not_equal body1, body2
   end
 
   private
