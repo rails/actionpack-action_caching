@@ -154,7 +154,7 @@ module ActionController
         def around(controller)
           cache_layout = @cache_layout.respond_to?(:call) ? @cache_layout.call(controller) : @cache_layout
 
-          path_options = if @cache_path.is_a?(Proc)
+          path_options = if @cache_path.is_a?(Proc) || @cache_path.respond_to?(:to_proc)
             controller.instance_exec(controller, &@cache_path)
           elsif @cache_path.respond_to?(:call)
             @cache_path.call(controller)

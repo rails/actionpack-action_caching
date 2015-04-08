@@ -35,6 +35,7 @@ class ActionCachingTestController < CachingController
   caches_action :show, cache_path: 'http://test.host/custom/show'
   caches_action :edit, cache_path: Proc.new { |c| c.params[:id] ? "http://test.host/#{c.params[:id]};edit" : 'http://test.host/edit' }
   caches_action :custom_cache_path, cache_path: CachePath.new
+  caches_action :symbol_cache_path, cache_path: :cache_path_protected_method
   caches_action :with_layout
   caches_action :with_format_and_http_param, cache_path: Proc.new { |c| { key: 'value' } }
   caches_action :with_symbol_format, cache_path: 'http://test.host/action_caching_test/with_symbol_format'
@@ -92,6 +93,7 @@ class ActionCachingTestController < CachingController
   alias_method :edit, :index
   alias_method :destroy, :index
   alias_method :custom_cache_path, :index
+  alias_method :symbol_cache_path, :index
   alias_method :layout_false, :with_layout
   alias_method :with_layout_proc_param, :with_layout
 
@@ -120,6 +122,12 @@ class ActionCachingTestController < CachingController
     respond_to do |format|
       format.json{ render json: @cache_this }
     end
+  end
+
+  protected
+
+  def cache_path_protected_method
+    ['controller', params[:id]].compact.join('-')
   end
 end
 
@@ -323,6 +331,16 @@ class ActionCacheTest < ActionController::TestCase
     assert fragment_exist?('controller')
 
     get :custom_cache_path, id: 1
+    assert_response :success
+    assert fragment_exist?('controller-1')
+  end
+
+  def test_action_cache_with_symbol_cache_path
+    get :symbol_cache_path
+    assert_response :success
+    assert fragment_exist?('controller')
+
+    get :symbol_cache_path, id: 1
     assert_response :success
     assert fragment_exist?('controller-1')
   end
