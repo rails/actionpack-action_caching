@@ -69,6 +69,10 @@ proc that specifies when the action should be cached.
 As of Rails 3.0, you can also pass `:expires_in` with a time
 interval (in seconds) to schedule expiration of the cached item.
 
+You can use `:on_hit`, which accepts a Proc or Symbol/String to a
+controller method, to define a callback hook that is executed when
+a cache hit occurs, right before the body is rendered.
+
 The following example depicts some of the points made above:
 
     class ListsController < ApplicationController
@@ -89,6 +93,10 @@ The following example depicts some of the points made above:
         else
           list_url(params[:id])
         end
+      end
+
+      caches_action :list, on_hit: Proc.new do
+        fresh_when last_modified: params[:updated_at]
       end
     end
 

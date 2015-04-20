@@ -37,6 +37,8 @@ class ActionCachingTestController < CachingController
   caches_action :custom_cache_path, cache_path: CachePath.new
   caches_action :with_layout
   caches_action :with_format_and_http_param, cache_path: Proc.new { |c| { key: 'value' } }
+  caches_action :with_on_hit, on_hit: Proc.new { |c| c.response.headers["ON-HIT"] = "TRUE" }
+  caches_action :with_on_hit_as_a_symbol, on_hit: :as_a_symbol
   caches_action :with_symbol_format, cache_path: 'http://test.host/action_caching_test/with_symbol_format'
   caches_action :layout_false, layout: false
   caches_action :with_layout_proc_param, layout: Proc.new { |c| c.params[:layout] }
@@ -66,6 +68,12 @@ class ActionCachingTestController < CachingController
     render text: @cache_this, layout: true
   end
 
+  def with_on_hit
+    @cache_this = MockTime.now.to_f.to_s
+    @title = nil
+    render text: @cache_this
+  end
+
   def with_format_and_http_param
     @cache_this = MockTime.now.to_f.to_s
     render text: @cache_this
@@ -88,6 +96,7 @@ class ActionCachingTestController < CachingController
     raise 'oops!'
   end
 
+  alias_method :with_on_hit_as_a_symbol, :with_on_hit
   alias_method :show, :index
   alias_method :edit, :index
   alias_method :destroy, :index
@@ -120,6 +129,10 @@ class ActionCachingTestController < CachingController
     respond_to do |format|
       format.json{ render json: @cache_this }
     end
+  end
+
+  def as_a_symbol
+    response.headers["ON-HIT-SYMBOL"] = "TRUE"
   end
 end
 
@@ -209,6 +222,36 @@ class ActionCacheTest < ActionController::TestCase
   end
 
   include RackTestUtils
+
+  def test_action_cache_with_on_hit
+    get :with_on_hit
+    assert_response :success
+    cached_time = content_to_cache
+    assert_equal cached_time, @response.body
+    assert fragment_exist?('hostname.com/action_caching_test/with_on_hit')
+    assert_equal @response.headers["ON-HIT"], nil
+
+    get :with_on_hit
+    assert_response :success
+    body = body_to_string(read_fragment('hostname.com/action_caching_test/with_on_hit'))
+    assert_equal @response.body, body
+    assert_equal @response.headers["ON-HIT"], "TRUE"
+  end
+
+  def test_action_cache_with_on_hit_as_a_symbol
+    get :with_on_hit_as_a_symbol
+    assert_response :success
+    cached_time = content_to_cache
+    assert_equal cached_time, @response.body
+    assert fragment_exist?('hostname.com/action_caching_test/with_on_hit_as_a_symbol')
+    assert_equal @response.headers["ON-HIT-SYMBOL"], nil
+
+    get :with_on_hit_as_a_symbol
+    assert_response :success
+    body = body_to_string(read_fragment('hostname.com/action_caching_test/with_on_hit_as_a_symbol'))
+    assert_equal @response.body, body
+    assert_equal @response.headers["ON-HIT-SYMBOL"], "TRUE"
+  end
 
   def test_action_cache_with_layout
     get :with_layout
