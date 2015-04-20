@@ -111,7 +111,7 @@ module ActionController
           options = actions.extract_options!
           options[:layout] = true unless options.key?(:layout)
           filter_options = options.extract!(:if, :unless).merge(only: actions)
-          cache_options  = options.extract!(:layout, :cache_path).merge(store_options: options)
+          cache_options  = options.extract!(:layout, :cache_path, :on_hit).merge(store_options: options)
 
           around_filter ActionCacheFilter.new(cache_options), filter_options
         end
@@ -147,8 +147,8 @@ module ActionController
 
       class ActionCacheFilter # :nodoc:
         def initialize(options, &block)
-          @cache_path, @store_options, @cache_layout =
-            options.values_at(:cache_path, :store_options, :layout)
+          @cache_path, @store_options, @cache_layout, @on_hit =
+            options.values_at(:cache_path, :store_options, :layout, :on_hit)
         end
 
         def around(controller)
@@ -166,7 +166,15 @@ module ActionController
 
           body = controller.read_fragment(cache_path.path, @store_options)
 
-          unless body
+          if body
+            if @on_hit.is_a?(Proc)
+              controller.instance_exec(controller, &@on_hit)
+            elsif @on_hit.respond_to?(:call)
+              @on_hit.call(controller)
+            elsif [Symbol, String].include?(@on_hit.class)
+              controller.send(@on_hit)
+            end
+          else
             controller.action_has_layout = false unless cache_layout
             yield
             controller.action_has_layout = true
