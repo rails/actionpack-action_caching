@@ -40,6 +40,8 @@ class ActionCachingTestController < CachingController
   caches_action :with_symbol_format, cache_path: 'http://test.host/action_caching_test/with_symbol_format'
   caches_action :layout_false, layout: false
   caches_action :with_layout_proc_param, layout: Proc.new { |c| c.params[:layout] }
+  caches_action :with_etag, fresh_when: true
+  caches_action :with_etag_with_options, fresh_when: { public: true }
   caches_action :record_not_found, :four_oh_four, :simple_runtime_error
   caches_action :streaming
   caches_action :invalid
@@ -94,6 +96,8 @@ class ActionCachingTestController < CachingController
   alias_method :custom_cache_path, :index
   alias_method :layout_false, :with_layout
   alias_method :with_layout_proc_param, :with_layout
+  alias_method :with_etag, :index
+  alias_method :with_etag_with_options, :index
 
   def expire
     expire_action controller: 'action_caching_test', action: 'index'
@@ -206,6 +210,26 @@ class ActionCacheTest < ActionController::TestCase
     get :destroy
     assert_response :success
     assert_not_equal cached_time, @response.body
+  end
+
+  def test_etag_disabled_by_default
+    get :index
+
+    assert_nil @response.headers['ETag']
+  end
+
+  def test_etag_added
+    get :with_etag
+
+    assert_not_nil @response.headers['ETag']
+    assert_nil @response.headers['Last-Modified']
+  end
+
+  def test_etag_with_options_added
+    get :with_etag_with_options
+
+    assert_not_nil @response.headers['ETag']
+    assert_equal @response.headers['Cache-Control'], 'public'
   end
 
   include RackTestUtils

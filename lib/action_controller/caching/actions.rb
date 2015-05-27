@@ -111,7 +111,7 @@ module ActionController
           options = actions.extract_options!
           options[:layout] = true unless options.key?(:layout)
           filter_options = options.extract!(:if, :unless).merge(only: actions)
-          cache_options  = options.extract!(:layout, :cache_path).merge(store_options: options)
+          cache_options  = options.extract!(:layout, :cache_path, :fresh_when).merge(store_options: options)
 
           around_filter ActionCacheFilter.new(cache_options), filter_options
         end
@@ -147,8 +147,8 @@ module ActionController
 
       class ActionCacheFilter # :nodoc:
         def initialize(options, &block)
-          @cache_path, @store_options, @cache_layout =
-            options.values_at(:cache_path, :store_options, :layout)
+          @cache_path, @store_options, @cache_layout, @fresh_when_options =
+            options.values_at(:cache_path, :store_options, :layout, :fresh_when)
         end
 
         def around(controller)
@@ -175,8 +175,23 @@ module ActionController
 
           body = controller.render_to_string(text: body, layout: true) unless cache_layout
 
-          controller.response_body = body
-          controller.content_type = Mime[cache_path.extension || :html]
+          render_with_cache_headers controller, body do
+            controller.response_body = body
+            controller.content_type = Mime[cache_path.extension || :html]
+          end
+        end
+
+        protected
+
+        def render_with_cache_headers(controller, object)
+          if @fresh_when_options
+            options = @fresh_when_options.is_a?(Hash) ? @fresh_when_options : {}
+            if controller.stale? options.merge(etag: object)
+              yield
+            end
+          else
+            yield
+          end
         end
       end
 
