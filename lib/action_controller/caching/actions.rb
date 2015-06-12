@@ -175,6 +175,10 @@ module ActionController
 
           body = controller.render_to_string(text: body, layout: true) unless cache_layout
 
+          if @store_options[:expires_in]
+            expires_in = @store_options.delete(:expires_in)
+            controller.expires_in expires_in, @store_options
+          end
           controller.response_body = body
           controller.content_type = Mime[cache_path.extension || :html]
         end

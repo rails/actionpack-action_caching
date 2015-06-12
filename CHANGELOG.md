@@ -1,3 +1,9 @@
+## 1.1.2 (June 12, 2015)
+
+*   Added Control-Cache headers support
+
+    *Alex Yusupov*
+
 *   Call `to_s` on the extension as it may be a symbol
 
     Fixes #10

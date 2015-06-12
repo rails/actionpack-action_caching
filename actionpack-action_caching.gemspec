@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |gem|
   gem.name          = 'actionpack-action_caching'
-  gem.version       = '1.1.0'
+  gem.version       = '1.1.2'
   gem.author        = 'David Heinemeier Hansson'
   gem.email         = 'david@loudthinking.com'
   gem.description   = 'Action caching for Action Pack (removed from core in Rails 4.0)'
