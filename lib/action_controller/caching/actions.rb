@@ -176,7 +176,7 @@ module ActionController
           body = controller.render_to_string(text: body, layout: true) unless cache_layout
 
           controller.response_body = body
-          controller.content_type = Mime[cache_path.extension || :html]
+          controller.content_type = controller.request.format
         end
       end
 
