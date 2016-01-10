@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |gem|
   gem.name          = 'actionpack-action_caching'
-  gem.version       = '1.1.0'
+  gem.version       = '2.0.0'
   gem.author        = 'David Heinemeier Hansson'
   gem.email         = 'david@loudthinking.com'
   gem.description   = 'Action caching for Action Pack (removed from core in Rails 4.0)'
@@ -15,8 +15,8 @@ Gem::Specification.new do |gem|
   gem.require_paths = ['lib']
   gem.license       = 'MIT'
 
-  gem.add_dependency 'actionpack', '>= 4.0.0', '< 5.0'
+  gem.add_dependency 'actionpack', '~> 5.x'
 
   gem.add_development_dependency 'mocha'
-  gem.add_development_dependency 'activerecord', '>= 4.0.0.beta', '< 5'
+  gem.add_development_dependency 'activerecord', '~> 5.x'
 end
