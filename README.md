@@ -29,7 +29,7 @@ authentication and other restrictions on whether someone is allowed
 to execute such action.
 
     class ListsController < ApplicationController
-      before_filter :authenticate, except: :public
+      before_action :authenticate, except: :public
 
       caches_page   :public
       caches_action :index, :show
@@ -72,7 +72,7 @@ interval (in seconds) to schedule expiration of the cached item.
 The following example depicts some of the points made above:
 
     class ListsController < ApplicationController
-      before_filter :authenticate, except: :public
+      before_action :authenticate, except: :public
 
       caches_page :public
 
