@@ -173,7 +173,7 @@ module ActionController
             body = controller._save_fragment(cache_path.path, @store_options)
           end
 
-          body = controller.render_to_string(text: body, layout: true) unless cache_layout
+          body = controller.render_to_string(plain: body, layout: true) unless cache_layout
 
           controller.response_body = body
           controller.content_type = Mime[cache_path.extension || :html]

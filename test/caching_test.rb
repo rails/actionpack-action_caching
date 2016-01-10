@@ -48,7 +48,7 @@ class ActionCachingTestController < CachingController
 
   def index
     @cache_this = MockTime.now.to_f.to_s
-    render text: @cache_this
+    render plain: @cache_this
   end
 
   def redirected
@@ -56,19 +56,19 @@ class ActionCachingTestController < CachingController
   end
 
   def forbidden
-    render text: 'Forbidden'
+    render plain: 'Forbidden'
     response.status = '403 Forbidden'
   end
 
   def with_layout
     @cache_this = MockTime.now.to_f.to_s
     @title = nil
-    render text: @cache_this, layout: true
+    render plain: @cache_this, layout: true
   end
 
   def with_format_and_http_param
     @cache_this = MockTime.now.to_f.to_s
-    render text: @cache_this
+    render plain: @cache_this
   end
 
   def with_symbol_format
@@ -81,7 +81,7 @@ class ActionCachingTestController < CachingController
   end
 
   def four_oh_four
-    render text: "404'd!", status: 404
+    render plain: "404'd!", status: 404
   end
 
   def simple_runtime_error
@@ -111,7 +111,7 @@ class ActionCachingTestController < CachingController
   end
 
   def streaming
-    render text: 'streaming', stream: true
+    render plain: 'streaming', stream: true
   end
 
   def invalid
