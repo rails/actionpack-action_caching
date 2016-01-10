@@ -239,13 +239,13 @@ class ActionCacheTest < ActionController::TestCase
   end
 
   def test_action_cache_with_layout_and_layout_cache_false_via_proc
-    get :with_layout_proc_param, layout: false
+    get :with_layout_proc_param, params: { layout: false }
     assert_response :success
     cached_time = content_to_cache
     assert_not_equal cached_time, @response.body
     assert fragment_exist?('hostname.com/action_caching_test/with_layout_proc_param')
 
-    get :with_layout_proc_param, layout: false
+    get :with_layout_proc_param, params: { layout: false }
     assert_response :success
     assert_not_equal cached_time, @response.body
     body = body_to_string(read_fragment('hostname.com/action_caching_test/with_layout_proc_param'))
@@ -253,13 +253,13 @@ class ActionCacheTest < ActionController::TestCase
   end
 
   def test_action_cache_with_layout_and_layout_cache_true_via_proc
-    get :with_layout_proc_param, layout: true
+    get :with_layout_proc_param, params: { layout: true }
     assert_response :success
     cached_time = content_to_cache
     assert_not_equal cached_time, @response.body
     assert fragment_exist?('hostname.com/action_caching_test/with_layout_proc_param')
 
-    get :with_layout_proc_param, layout: true
+    get :with_layout_proc_param, params: { layout: true }
     assert_response :success
     assert_not_equal cached_time, @response.body
     body = body_to_string(read_fragment('hostname.com/action_caching_test/with_layout_proc_param'))
@@ -312,7 +312,7 @@ class ActionCacheTest < ActionController::TestCase
     assert_response :success
     assert fragment_exist?('test.host/edit')
 
-    get :edit, id: 1
+    get :edit, params: { id: 1 }
     assert_response :success
     assert fragment_exist?('test.host/1;edit')
   end
@@ -322,7 +322,7 @@ class ActionCacheTest < ActionController::TestCase
     assert_response :success
     assert fragment_exist?('controller')
 
-    get :custom_cache_path, id: 1
+    get :custom_cache_path, params: { id: 1 }
     assert_response :success
     assert fragment_exist?('controller-1')
   end
@@ -440,8 +440,8 @@ class ActionCacheTest < ActionController::TestCase
 
   def test_correct_content_type_is_returned_for_cache_hit
     # run it twice to cache it the first time
-    get :index, id: 'content-type', format: 'xml'
-    get :index, id: 'content-type', format: 'xml'
+    get :index, params: { id: 'content-type' }, format: 'xml'
+    get :index, params: { id: 'content-type' }, format: 'xml'
     assert_response :success
     assert_equal 'application/xml', @response.content_type
   end
@@ -456,8 +456,8 @@ class ActionCacheTest < ActionController::TestCase
 
   def test_correct_content_type_is_returned_for_cache_hit_on_action_with_string_key_from_proc
     # run it twice to cache it the first time
-    get :edit, id: 1, format: 'xml'
-    get :edit, id: 1, format: 'xml'
+    get :edit, params: { id: 1 }, format: 'xml'
+    get :edit, params: { id: 1 }, format: 'xml'
     assert_response :success
     assert_equal 'application/xml', @response.content_type
   end
@@ -470,8 +470,8 @@ class ActionCacheTest < ActionController::TestCase
   end
 
   def test_file_extensions
-    get :index, id: 'kitten.jpg'
-    get :index, id: 'kitten.jpg'
+    get :index, params: { id: 'kitten.jpg' }
+    get :index, params: { id: 'kitten.jpg' }
 
     assert_response :success
   end
