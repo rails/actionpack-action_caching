@@ -25,9 +25,9 @@ class ActionCachingTestController < CachingController
   end
 
   # Eliminate uninitialized ivar warning
-  before_filter { @title = nil }
+  before_action { @title = nil }
 
-  before_filter only: :with_symbol_format do
+  before_action only: :with_symbol_format do
     request.params[:format] = :json
   end
 

@@ -10,7 +10,7 @@ module ActionController
     # to execute such action.
     #
     #   class ListsController < ApplicationController
-    #     before_filter :authenticate, except: :public
+    #     before_action :authenticate, except: :public
     #
     #     caches_page   :public
     #     caches_action :index, :show
@@ -66,7 +66,7 @@ module ActionController
     #
     #
     #   class ListsController < ApplicationController
-    #     before_filter :authenticate, except: :public
+    #     before_action :authenticate, except: :public
     #
     #     caches_page :public
     #
@@ -113,7 +113,7 @@ module ActionController
           filter_options = options.extract!(:if, :unless).merge(only: actions)
           cache_options  = options.extract!(:layout, :cache_path).merge(store_options: options)
 
-          around_filter ActionCacheFilter.new(cache_options), filter_options
+          around_action ActionCacheFilter.new(cache_options), filter_options
         end
       end
 
