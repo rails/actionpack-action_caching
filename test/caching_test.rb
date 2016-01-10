@@ -97,17 +97,17 @@ class ActionCachingTestController < CachingController
 
   def expire
     expire_action controller: 'action_caching_test', action: 'index'
-    render nothing: true
+    head :ok
   end
 
   def expire_xml
     expire_action controller: 'action_caching_test', action: 'index', format: 'xml'
-    render nothing: true
+    head :ok
   end
 
   def expire_with_url_string
     expire_action url_for(controller: 'action_caching_test', action: 'index')
-    render nothing: true
+    head :ok
   end
 
   def streaming
