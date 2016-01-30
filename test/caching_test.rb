@@ -41,7 +41,7 @@ class ActionCachingTestController < CachingController
   caches_action :with_symbol_format, cache_path: 'http://test.host/action_caching_test/with_symbol_format'
   caches_action :not_url_cache_path, cache_path: Proc.new { |c| "#{c.params[:action]}_key" }
   caches_action :layout_false, layout: false
-  caches_action :with_layout_proc_param, layout: Proc.new { |c| c.params[:layout] }
+  caches_action :with_layout_proc_param, layout: Proc.new { |c| c.params[:layout] != "false" }
   caches_action :record_not_found, :four_oh_four, :simple_runtime_error
   caches_action :streaming
   caches_action :invalid
