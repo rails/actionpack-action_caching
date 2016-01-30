@@ -9,6 +9,7 @@ Gem::Specification.new do |gem|
   gem.summary       = 'Action caching for Action Pack (removed from core in Rails 4.0)'
   gem.homepage      = 'https://github.com/rails/actionpack-action_caching'
 
+  gem.required_ruby_version = '>= 2.2.2'
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
