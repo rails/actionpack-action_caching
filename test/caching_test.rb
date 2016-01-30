@@ -563,7 +563,7 @@ class ActionCacheTest < ActionController::TestCase
   private
 
     def content_to_cache
-      assigns(:cache_this)
+      @controller.instance_variable_get(:@cache_this)
     end
 
     def fragment_exist?(path)
