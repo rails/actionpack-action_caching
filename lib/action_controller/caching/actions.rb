@@ -189,10 +189,9 @@ module ActionController
         # request format.
         def initialize(controller, options = {}, infer_extension = true)
           if infer_extension
-            @extension = controller.params[:format]
+            @extension = controller.params[:format] || controller.request.format.to_sym
             options.reverse_merge!(format: @extension) if options.is_a?(Hash)
           end
-
           path = controller.url_for(options).split('://', 2).last
           @path = normalize!(path)
         end

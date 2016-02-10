@@ -96,7 +96,7 @@ class ActionCachingTestController < CachingController
   alias_method :with_layout_proc_param, :with_layout
 
   def expire
-    expire_action controller: 'action_caching_test', action: 'index'
+    expire_action controller: 'action_caching_test', action: 'index', format: 'html'
     render nothing: true
   end
 
@@ -106,7 +106,7 @@ class ActionCachingTestController < CachingController
   end
 
   def expire_with_url_string
-    expire_action url_for(controller: 'action_caching_test', action: 'index')
+    expire_action url_for(controller: 'action_caching_test', action: 'index', format: 'html')
     render nothing: true
   end
 
@@ -177,7 +177,7 @@ class ActionCacheTest < ActionController::TestCase
     assert_response :success
     cached_time = content_to_cache
     assert_equal cached_time, @response.body
-    assert fragment_exist?('hostname.com/action_caching_test')
+    assert fragment_exist?('hostname.com/action_caching_test.html')
 
     head :index
     assert_response :success
@@ -189,7 +189,7 @@ class ActionCacheTest < ActionController::TestCase
     assert_response :success
     cached_time = content_to_cache
     assert_equal cached_time, @response.body
-    assert fragment_exist?('hostname.com/action_caching_test')
+    assert fragment_exist?('hostname.com/action_caching_test.html')
 
     get :index
     assert_response :success
@@ -215,12 +215,12 @@ class ActionCacheTest < ActionController::TestCase
     assert_response :success
     cached_time = content_to_cache
     assert_not_equal cached_time, @response.body
-    assert fragment_exist?('hostname.com/action_caching_test/with_layout')
+    assert fragment_exist?('hostname.com/action_caching_test/with_layout.html')
 
     get :with_layout
     assert_response :success
     assert_not_equal cached_time, @response.body
-    body = body_to_string(read_fragment('hostname.com/action_caching_test/with_layout'))
+    body = body_to_string(read_fragment('hostname.com/action_caching_test/with_layout.html'))
     assert_equal @response.body, body
   end
 
@@ -229,12 +229,12 @@ class ActionCacheTest < ActionController::TestCase
     assert_response :success
     cached_time = content_to_cache
     assert_not_equal cached_time, @response.body
-    assert fragment_exist?('hostname.com/action_caching_test/layout_false')
+    assert fragment_exist?('hostname.com/action_caching_test/layout_false.html')
 
     get :layout_false
     assert_response :success
     assert_not_equal cached_time, @response.body
-    body = body_to_string(read_fragment('hostname.com/action_caching_test/layout_false'))
+    body = body_to_string(read_fragment('hostname.com/action_caching_test/layout_false.html'))
     assert_equal cached_time, body
   end
 
@@ -243,12 +243,12 @@ class ActionCacheTest < ActionController::TestCase
     assert_response :success
     cached_time = content_to_cache
     assert_not_equal cached_time, @response.body
-    assert fragment_exist?('hostname.com/action_caching_test/with_layout_proc_param')
+    assert fragment_exist?('hostname.com/action_caching_test/with_layout_proc_param.html')
 
     get :with_layout_proc_param, layout: false
     assert_response :success
     assert_not_equal cached_time, @response.body
-    body = body_to_string(read_fragment('hostname.com/action_caching_test/with_layout_proc_param'))
+    body = body_to_string(read_fragment('hostname.com/action_caching_test/with_layout_proc_param.html'))
     assert_equal cached_time, body
   end
 
@@ -257,12 +257,12 @@ class ActionCacheTest < ActionController::TestCase
     assert_response :success
     cached_time = content_to_cache
     assert_not_equal cached_time, @response.body
-    assert fragment_exist?('hostname.com/action_caching_test/with_layout_proc_param')
+    assert fragment_exist?('hostname.com/action_caching_test/with_layout_proc_param.html')
 
     get :with_layout_proc_param, layout: true
     assert_response :success
     assert_not_equal cached_time, @response.body
-    body = body_to_string(read_fragment('hostname.com/action_caching_test/with_layout_proc_param'))
+    body = body_to_string(read_fragment('hostname.com/action_caching_test/with_layout_proc_param.html'))
     assert_equal @response.body, body
   end
 
@@ -270,7 +270,7 @@ class ActionCacheTest < ActionController::TestCase
     @request.env['HTTP_ACCEPT'] = 'application/json'
     get :index
     assert_response :success
-    assert !fragment_exist?('hostname.com/action_caching_test')
+    assert !fragment_exist?('hostname.com/action_caching_test.json')
   end
 
   def test_action_cache_with_format_and_http_param
@@ -289,8 +289,8 @@ class ActionCacheTest < ActionController::TestCase
 
   def test_action_cache_with_store_options
     MockTime.expects(:now).returns(12345).once
-    @controller.expects(:read_fragment).with('hostname.com/action_caching_test', expires_in: 1.hour).once
-    @controller.expects(:write_fragment).with('hostname.com/action_caching_test', '12345.0', expires_in: 1.hour).once
+    @controller.expects(:read_fragment).with('hostname.com/action_caching_test.html', expires_in: 1.hour).once
+    @controller.expects(:write_fragment).with('hostname.com/action_caching_test.html', '12345.0', expires_in: 1.hour).once
     get :index
     assert_response :success
   end
@@ -300,7 +300,7 @@ class ActionCacheTest < ActionController::TestCase
     assert_response :success
     cached_time = content_to_cache
     assert_equal cached_time, @response.body
-    assert fragment_exist?('test.host/custom/show')
+    assert fragment_exist?('test.host/custom/show.html')
 
     get :show
     assert_response :success
@@ -310,21 +310,21 @@ class ActionCacheTest < ActionController::TestCase
   def test_action_cache_with_custom_cache_path_in_block
     get :edit
     assert_response :success
-    assert fragment_exist?('test.host/edit')
+    assert fragment_exist?('test.host/edit.html')
 
     get :edit, id: 1
     assert_response :success
-    assert fragment_exist?('test.host/1;edit')
+    assert fragment_exist?('test.host/1;edit.html')
   end
 
   def test_action_cache_with_custom_cache_path_with_custom_object
     get :custom_cache_path
     assert_response :success
-    assert fragment_exist?('controller')
+    assert fragment_exist?('controller.html')
 
     get :custom_cache_path, id: 1
     assert_response :success
-    assert fragment_exist?('controller-1')
+    assert fragment_exist?('controller-1.html')
   end
 
   def test_cache_expiration
@@ -466,7 +466,7 @@ class ActionCacheTest < ActionController::TestCase
     @mock_controller.mock_url_for = 'http://example.org/'
     @mock_controller.mock_path    = '/'
 
-    assert_equal 'example.org/index', @path_class.new(@mock_controller, {}).path
+    assert_equal 'example.org/index.all', @path_class.new(@mock_controller, {}).path
   end
 
   def test_file_extensions
@@ -508,7 +508,7 @@ class ActionCacheTest < ActionController::TestCase
     get :streaming
     assert_response :success
     assert_match(/streaming/, @response.body)
-    assert fragment_exist?('hostname.com/action_caching_test/streaming')
+    assert fragment_exist?('hostname.com/action_caching_test/streaming.html')
   end
 
   def test_invalid_format_returns_not_acceptable
