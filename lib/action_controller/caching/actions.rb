@@ -111,7 +111,7 @@ module ActionController
           options = actions.extract_options!
           options[:layout] = true unless options.key?(:layout)
           filter_options = options.extract!(:if, :unless).merge(only: actions)
-          cache_options  = options.extract!(:layout, :cache_path).merge(store_options: options)
+          cache_options  = options.extract!(:layout, :cache_path, :http_cache).merge(store_options: options)
 
           around_filter ActionCacheFilter.new(cache_options), filter_options
         end
@@ -147,8 +147,8 @@ module ActionController
 
       class ActionCacheFilter # :nodoc:
         def initialize(options, &block)
-          @cache_path, @store_options, @cache_layout =
-            options.values_at(:cache_path, :store_options, :layout)
+          @cache_path, @store_options, @cache_layout, @http_cache =
+            options.values_at(:cache_path, :store_options, :layout, :http_cache)
         end
 
         def around(controller)
@@ -164,18 +164,31 @@ module ActionController
 
           cache_path = ActionCachePath.new(controller, path_options || {})
 
-          body = controller.read_fragment(cache_path.path, @store_options)
-
-          unless body
-            controller.action_has_layout = false unless cache_layout
-            yield
-            controller.action_has_layout = true
-            body = controller._save_fragment(cache_path.path, @store_options)
+          http_cache_options = if @http_cache.is_a?(Proc)
+            controller.instance_exec(controller, &@http_cache)
+          elsif @http_cache.is_a?(Hash)
+            {
+              etag: controller.instance_exec(controller, &@http_cache[:etag]),
+              last_modified: controller.instance_exec(controller, &@http_cache[:last_modified]),
+            }
+          else
+            @http_cache
           end
 
-          body = controller.render_to_string(text: body, layout: true) unless cache_layout
+          if !http_cache_options || controller.stale?(http_cache_options)
+            body = controller.read_fragment(cache_path.path, @store_options)
 
-          controller.response_body = body
+            unless body
+              controller.action_has_layout = false unless cache_layout
+              yield
+              controller.action_has_layout = true
+              body = controller._save_fragment(cache_path.path, @store_options)
+            end
+
+            body = controller.render_to_string(text: body, layout: true) unless cache_layout
+
+            controller.response_body = body
+          end
           controller.content_type = Mime[cache_path.extension || :html]
         end
       end
