@@ -1,13 +1,12 @@
 language: ruby
+sudo: false
 before_install:
   - gem install bundler
 rvm:
-  - 1.9.3
-  - 2.0.0
+  - 2.2.2
 gemfile:
   - Gemfile
   - gemfiles/Gemfile-edge
-  - gemfiles/Gemfile-4-0-stable
 matrix:
   allow_failures:
     - gemfile: gemfiles/Gemfile-edge

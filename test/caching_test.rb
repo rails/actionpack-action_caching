@@ -25,9 +25,9 @@ class ActionCachingTestController < CachingController
   end
 
   # Eliminate uninitialized ivar warning
-  before_filter { @title = nil }
+  before_action { @title = nil }
 
-  before_filter only: :with_symbol_format do
+  before_action only: :with_symbol_format do
     request.params[:format] = :json
   end
 
@@ -41,7 +41,7 @@ class ActionCachingTestController < CachingController
   caches_action :with_symbol_format, cache_path: 'http://test.host/action_caching_test/with_symbol_format'
   caches_action :not_url_cache_path, cache_path: Proc.new { |c| "#{c.params[:action]}_key" }
   caches_action :layout_false, layout: false
-  caches_action :with_layout_proc_param, layout: Proc.new { |c| c.params[:layout] }
+  caches_action :with_layout_proc_param, layout: Proc.new { |c| c.params[:layout] != "false" }
   caches_action :record_not_found, :four_oh_four, :simple_runtime_error
   caches_action :streaming
   caches_action :invalid
@@ -50,7 +50,7 @@ class ActionCachingTestController < CachingController
 
   def index
     @cache_this = MockTime.now.to_f.to_s
-    render text: @cache_this
+    render plain: @cache_this
   end
 
   def redirected
@@ -58,19 +58,19 @@ class ActionCachingTestController < CachingController
   end
 
   def forbidden
-    render text: 'Forbidden'
+    render plain: 'Forbidden'
     response.status = '403 Forbidden'
   end
 
   def with_layout
     @cache_this = MockTime.now.to_f.to_s
     @title = nil
-    render text: @cache_this, layout: true
+    render plain: @cache_this, layout: true
   end
 
   def with_format_and_http_param
     @cache_this = MockTime.now.to_f.to_s
-    render text: @cache_this
+    render plain: @cache_this
   end
 
   def with_symbol_format
@@ -87,7 +87,7 @@ class ActionCachingTestController < CachingController
   end
 
   def four_oh_four
-    render text: "404'd!", status: 404
+    render plain: "404'd!", status: 404
   end
 
   def simple_runtime_error
@@ -104,21 +104,21 @@ class ActionCachingTestController < CachingController
 
   def expire
     expire_action controller: 'action_caching_test', action: 'index'
-    render nothing: true
+    head :ok
   end
 
   def expire_xml
     expire_action controller: 'action_caching_test', action: 'index', format: 'xml'
-    render nothing: true
+    head :ok
   end
 
   def expire_with_url_string
     expire_action url_for(controller: 'action_caching_test', action: 'index')
-    render nothing: true
+    head :ok
   end
 
   def streaming
-    render text: 'streaming', stream: true
+    render plain: 'streaming', stream: true
   end
 
   def invalid
@@ -252,13 +252,13 @@ class ActionCacheTest < ActionController::TestCase
   end
 
   def test_action_cache_with_layout_and_layout_cache_false_via_proc
-    get :with_layout_proc_param, layout: false
+    get :with_layout_proc_param, params: { layout: false }
     assert_response :success
     cached_time = content_to_cache
     assert_not_equal cached_time, @response.body
     assert fragment_exist?('hostname.com/action_caching_test/with_layout_proc_param')
 
-    get :with_layout_proc_param, layout: false
+    get :with_layout_proc_param, params: { layout: false }
     assert_response :success
     assert_not_equal cached_time, @response.body
     body = body_to_string(read_fragment('hostname.com/action_caching_test/with_layout_proc_param'))
@@ -266,13 +266,13 @@ class ActionCacheTest < ActionController::TestCase
   end
 
   def test_action_cache_with_layout_and_layout_cache_true_via_proc
-    get :with_layout_proc_param, layout: true
+    get :with_layout_proc_param, params: { layout: true }
     assert_response :success
     cached_time = content_to_cache
     assert_not_equal cached_time, @response.body
     assert fragment_exist?('hostname.com/action_caching_test/with_layout_proc_param')
 
-    get :with_layout_proc_param, layout: true
+    get :with_layout_proc_param, params: { layout: true }
     assert_response :success
     assert_not_equal cached_time, @response.body
     body = body_to_string(read_fragment('hostname.com/action_caching_test/with_layout_proc_param'))
@@ -332,7 +332,7 @@ class ActionCacheTest < ActionController::TestCase
     assert_response :success
     assert fragment_exist?('test.host/edit')
 
-    get :edit, id: 1
+    get :edit, params: { id: 1 }
     assert_response :success
     assert fragment_exist?('test.host/1;edit')
   end
@@ -342,7 +342,7 @@ class ActionCacheTest < ActionController::TestCase
     assert_response :success
     assert fragment_exist?('controller')
 
-    get :custom_cache_path, id: 1
+    get :custom_cache_path, params: { id: 1 }
     assert_response :success
     assert fragment_exist?('controller-1')
   end
@@ -470,8 +470,8 @@ class ActionCacheTest < ActionController::TestCase
 
   def test_correct_content_type_is_returned_for_cache_hit
     # run it twice to cache it the first time
-    get :index, id: 'content-type', format: 'xml'
-    get :index, id: 'content-type', format: 'xml'
+    get :index, params: { id: 'content-type' }, format: 'xml'
+    get :index, params: { id: 'content-type' }, format: 'xml'
     assert_response :success
     assert_equal 'application/xml', @response.content_type
   end
@@ -486,8 +486,8 @@ class ActionCacheTest < ActionController::TestCase
 
   def test_correct_content_type_is_returned_for_cache_hit_on_action_with_string_key_from_proc
     # run it twice to cache it the first time
-    get :edit, id: 1, format: 'xml'
-    get :edit, id: 1, format: 'xml'
+    get :edit, params: { id: 1 }, format: 'xml'
+    get :edit, params: { id: 1 }, format: 'xml'
     assert_response :success
     assert_equal 'application/xml', @response.content_type
   end
@@ -500,8 +500,8 @@ class ActionCacheTest < ActionController::TestCase
   end
 
   def test_file_extensions
-    get :index, id: 'kitten.jpg'
-    get :index, id: 'kitten.jpg'
+    get :index, params: { id: 'kitten.jpg' }
+    get :index, params: { id: 'kitten.jpg' }
 
     assert_response :success
   end
@@ -563,7 +563,7 @@ class ActionCacheTest < ActionController::TestCase
   private
 
     def content_to_cache
-      assigns(:cache_this)
+      @controller.instance_variable_get(:@cache_this)
     end
 
     def fragment_exist?(path)
