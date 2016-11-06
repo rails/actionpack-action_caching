@@ -38,6 +38,7 @@ class ActionCachingTestController < CachingController
   caches_action :with_layout
   caches_action :with_format_and_http_param, cache_path: Proc.new { |c| { key: 'value' } }
   caches_action :with_symbol_format, cache_path: 'http://test.host/action_caching_test/with_symbol_format'
+  caches_action :not_url_cache_path, cache_path: Proc.new { |c| "#{c.params[:action]}_key" }
   caches_action :layout_false, layout: false
   caches_action :with_layout_proc_param, layout: Proc.new { |c| c.params[:layout] }
   caches_action :record_not_found, :four_oh_four, :simple_runtime_error
@@ -74,6 +75,10 @@ class ActionCachingTestController < CachingController
   def with_symbol_format
     @cache_this = MockTime.now.to_f.to_s
     render json: { timestamp: @cache_this }
+  end
+
+  def not_url_cache_path
+    render text: 'cache_this'
   end
 
   def record_not_found
@@ -285,6 +290,13 @@ class ActionCacheTest < ActionController::TestCase
     assert_response :success
     assert !fragment_exist?('test.host/action_caching_test/with_symbol_format')
     assert fragment_exist?('test.host/action_caching_test/with_symbol_format.json')
+  end
+
+  def test_action_cache_not_url_cache_path
+    get :not_url_cache_path
+    assert_response :success
+    assert !fragment_exist?('test.host/action_caching_test/not_url_cache_path')
+    assert fragment_exist?('not_url_cache_path_key')
   end
 
   def test_action_cache_with_store_options
