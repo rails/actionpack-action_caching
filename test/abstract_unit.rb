@@ -4,14 +4,7 @@ require 'action_controller'
 require 'active_record'
 require 'action_controller/action_caching'
 
-FIXTURE_LOAD_PATH = File.join(File.dirname(__FILE__), 'fixtures')
-
-
-module ActionController
-  class Base
-    self.view_paths = FIXTURE_LOAD_PATH
-  end
-end
+FIXTURE_LOAD_PATH = File.expand_path('../fixtures', __FILE__)
 
 module RackTestUtils
   def body_to_string(body)

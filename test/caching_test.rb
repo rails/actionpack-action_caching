@@ -24,6 +24,8 @@ class ActionCachingTestController < CachingController
     rescue_from(ActiveRecord::RecordNotFound) { head :not_found }
   end
 
+  self.view_paths = FIXTURE_LOAD_PATH
+
   # Eliminate uninitialized ivar warning
   before_action { @title = nil }
 
