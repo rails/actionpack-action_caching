@@ -2,8 +2,9 @@ require 'abstract_unit'
 require 'mocha/setup'
 
 CACHE_DIR = 'test_cache'
-# Don't change '/../temp/' cavalierly or you might hose something you don't want hosed
-FILE_STORE_PATH = File.join(File.dirname(__FILE__), '/../temp/', CACHE_DIR)
+# Don't change "../tmp" cavalierly or you might hose something you don't want hosed
+TEST_TMP_DIR = File.expand_path("../tmp", __FILE__)
+FILE_STORE_PATH = File.join(TEST_TMP_DIR, CACHE_DIR)
 
 class CachingController < ActionController::Base
   abstract!
@@ -33,17 +34,17 @@ class ActionCachingTestController < CachingController
     request.params[:format] = :json
   end
 
-  caches_action :index, :redirected, :forbidden, if: Proc.new { |c| c.request.format && !c.request.format.json? }, expires_in: 1.hour
+  caches_action :index, :redirected, :forbidden, if: ->(c) { c.request.format && !c.request.format.json? }, expires_in: 1.hour
   caches_action :show, cache_path: 'http://test.host/custom/show'
-  caches_action :edit, cache_path: Proc.new { |c| c.params[:id] ? "http://test.host/#{c.params[:id]};edit" : 'http://test.host/edit' }
+  caches_action :edit, cache_path: ->(c) { c.params[:id] ? "http://test.host/#{c.params[:id]};edit" : 'http://test.host/edit' }
   caches_action :custom_cache_path, cache_path: CachePath.new
   caches_action :symbol_cache_path, cache_path: :cache_path_protected_method
   caches_action :with_layout
-  caches_action :with_format_and_http_param, cache_path: Proc.new { |c| { key: 'value' } }
+  caches_action :with_format_and_http_param, cache_path: ->(c) { { key: 'value' } }
   caches_action :with_symbol_format, cache_path: 'http://test.host/action_caching_test/with_symbol_format'
-  caches_action :not_url_cache_path, cache_path: Proc.new { |c| "#{c.params[:action]}_key" }
+  caches_action :not_url_cache_path, cache_path: ->(c) { "#{c.params[:action]}_key" }
   caches_action :layout_false, layout: false
-  caches_action :with_layout_proc_param, layout: Proc.new { |c| c.params[:layout] != "false" }
+  caches_action :with_layout_proc_param, layout: ->(c) { c.params[:layout] != "false" }
   caches_action :record_not_found, :four_oh_four, :simple_runtime_error
   caches_action :streaming
   caches_action :invalid
