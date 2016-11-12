@@ -249,8 +249,6 @@ class ActionCacheTest < ActionController::TestCase
     assert_not_equal cached_time, @response.body
   end
 
-  include RackTestUtils
-
   def test_action_cache_with_layout
     draw do
       get '/action_caching_test/with_layout', to: 'action_caching_test#with_layout'
@@ -265,8 +263,7 @@ class ActionCacheTest < ActionController::TestCase
     get :with_layout
     assert_response :success
     assert_not_equal cached_time, @response.body
-    body = body_to_string(read_fragment('hostname.com/action_caching_test/with_layout'))
-    assert_equal @response.body, body
+    assert_equal @response.body, read_fragment('hostname.com/action_caching_test/with_layout')
   end
 
   def test_action_cache_with_layout_and_layout_cache_false
@@ -283,8 +280,7 @@ class ActionCacheTest < ActionController::TestCase
     get :layout_false
     assert_response :success
     assert_not_equal cached_time, @response.body
-    body = body_to_string(read_fragment('hostname.com/action_caching_test/layout_false'))
-    assert_equal cached_time, body
+    assert_equal cached_time, read_fragment('hostname.com/action_caching_test/layout_false')
   end
 
   def test_action_cache_with_layout_and_layout_cache_false_via_proc
@@ -301,8 +297,7 @@ class ActionCacheTest < ActionController::TestCase
     get :with_layout_proc_param, params: { layout: false }
     assert_response :success
     assert_not_equal cached_time, @response.body
-    body = body_to_string(read_fragment('hostname.com/action_caching_test/with_layout_proc_param'))
-    assert_equal cached_time, body
+    assert_equal cached_time, read_fragment('hostname.com/action_caching_test/with_layout_proc_param')
   end
 
   def test_action_cache_with_layout_and_layout_cache_true_via_proc
@@ -319,8 +314,7 @@ class ActionCacheTest < ActionController::TestCase
     get :with_layout_proc_param, params: { layout: true }
     assert_response :success
     assert_not_equal cached_time, @response.body
-    body = body_to_string(read_fragment('hostname.com/action_caching_test/with_layout_proc_param'))
-    assert_equal @response.body, body
+    assert_equal @response.body, read_fragment('hostname.com/action_caching_test/with_layout_proc_param')
   end
 
   def test_action_cache_conditional_options
