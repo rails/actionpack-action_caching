@@ -173,10 +173,20 @@ module ActionController
             body = controller._save_fragment(cache_path.path, @store_options)
           end
 
-          body = controller.render_to_string(plain: body, layout: true) unless cache_layout
+          body = render_to_string(controller, body) unless cache_layout
 
           controller.response_body = body
           controller.content_type = Mime[cache_path.extension || :html]
+        end
+
+        if ActionPack::VERSION::STRING < '4.1'
+          def render_to_string(controller, body)
+            controller.render_to_string(text: body, layout: true)
+          end
+        else
+          def render_to_string(controller, body)
+            controller.render_to_string(plain: body, layout: true)
+          end
         end
       end
 
