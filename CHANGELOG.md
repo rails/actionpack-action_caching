@@ -1,14 +1,26 @@
-*   Call `to_s` on the extension as it may be a symbol
+*   Respect `Accept` header when caching actions
 
-    Fixes #10
+    Fixes #18.
 
     *Andrew White*
+
+*   Support Rails 4.0, 4.1, 4.2, 5.0 and edge
+
+    *Eileen Uchitelle*, *Andrew White*
+
+*   Call `to_s` on the extension as it may be a symbol
+
+    Fixes #10.
+
+    *Andrew White*
+
 
 ## 1.1.1 (January 2, 2014)
 
 *   Fix load order problem with other gems
 
     *Andrew White*
+
 
 ## 1.1.0 (November 1, 2013)
 
@@ -29,6 +41,7 @@
         end
 
     *Piotr Niełacny*
+
 
 ## 1.0.0 (February 28, 2013)
 
