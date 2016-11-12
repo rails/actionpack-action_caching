@@ -8,7 +8,7 @@ Installation
 
 Add this line to your application's Gemfile:
 
-    gem 'actionpack-action_caching'
+    gem "actionpack-action_caching"
 
 And then execute:
 
@@ -54,8 +54,8 @@ Different representations of the same resource, e.g.
 `http://david.example.com/lists.xml`
 are treated like separate requests and so are cached separately.
 Keep in mind when expiring an action cache that
-`action: 'lists'` is not the same as
-`action: 'list', format: :xml`.
+`action: "lists"` is not the same as
+`action: "list", format: :xml`.
 
 You can modify the default action cache path by passing a
 `:cache_path` option. This will be passed directly to

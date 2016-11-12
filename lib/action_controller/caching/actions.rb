@@ -1,4 +1,4 @@
-require 'set'
+require "set"
 
 module ActionController
   module Caching
@@ -35,8 +35,8 @@ module ActionController
     # <tt>http://david.example.com/lists.xml</tt>
     # are treated like separate requests and so are cached separately.
     # Keep in mind when expiring an action cache that
-    # <tt>action: 'lists'</tt> is not the same as
-    # <tt>action: 'lists', format: :xml</tt>.
+    # <tt>action: "lists"</tt> is not the same as
+    # <tt>action: "lists", format: :xml</tt>.
     #
     # You can modify the default action cache path by passing a
     # <tt>:cache_path</tt> option. This will be passed directly to
@@ -85,7 +85,7 @@ module ActionController
     #       end
     #     end
     #
-    #     caches_action :posts, cache_path: CachePathCreator.new('posts')
+    #     caches_action :posts, cache_path: CachePathCreator.new("posts")
     #   end
     #
     # If you pass <tt>layout: false</tt>, it will only cache your action
@@ -118,7 +118,7 @@ module ActionController
       end
 
       def _save_fragment(name, options)
-        content = ''
+        content = ""
         response_body.each do |parts|
           content << parts
         end
@@ -179,7 +179,7 @@ module ActionController
           controller.content_type = Mime[cache_path.extension || :html]
         end
 
-        if ActionPack::VERSION::STRING < '4.1'
+        if ActionPack::VERSION::STRING < "4.1"
           def render_to_string(controller, body)
             controller.render_to_string(text: body, layout: true)
           end
@@ -203,15 +203,15 @@ module ActionController
             options.reverse_merge!(format: @extension) if options.is_a?(Hash)
           end
 
-          path = controller.url_for(options).split('://', 2).last
+          path = controller.url_for(options).split("://", 2).last
           @path = normalize!(path)
         end
 
       private
         def normalize!(path)
           ext = URI.parser.escape(extension.to_s) if extension
-          path << 'index' if path[-1] == ?/
-          path << ".#{ext}" if extension and !path.split('?', 2).first.ends_with?(".#{ext}")
+          path << "index" if path[-1] == ?/
+          path << ".#{ext}" if extension && !path.split("?", 2).first.ends_with?(".#{ext}")
           URI.parser.unescape(path)
         end
       end
