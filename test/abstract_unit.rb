@@ -6,23 +6,10 @@ require 'action_controller/action_caching'
 
 FIXTURE_LOAD_PATH = File.join(File.dirname(__FILE__), 'fixtures')
 
-SharedTestRoutes = ActionDispatch::Routing::RouteSet.new
 
 module ActionController
   class Base
-    include SharedTestRoutes.url_helpers
-
     self.view_paths = FIXTURE_LOAD_PATH
-  end
-
-  class TestCase
-    def setup
-      @routes = SharedTestRoutes
-
-      @routes.draw do
-        get ':controller(/:action)'
-      end
-    end
   end
 end
 
