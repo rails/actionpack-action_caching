@@ -426,7 +426,7 @@ class ActionCacheTest < ActionController::TestCase
     assert_response :success
     assert fragment_exist?('controller')
 
-    get :symbol_cache_path, id: 1
+    get :symbol_cache_path, params: { id: 1 }
     assert_response :success
     assert fragment_exist?('controller-1')
   end
@@ -719,5 +719,16 @@ class ActionCacheTest < ActionController::TestCase
       @routes = ActionDispatch::Routing::RouteSet.new
       @routes.draw(&block)
       @controller.extend(@routes.url_helpers)
+    end
+
+    if ActionPack::VERSION::STRING < '5.0'
+      def get(action, options = {})
+        format = options.slice(:format)
+        params = options[:params] || {}
+        session = options[:session] || {}
+        flash = options[:flash] || {}
+
+        super(action, params.merge(format), session, flash)
+      end
     end
 end
