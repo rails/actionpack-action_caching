@@ -284,34 +284,34 @@ class ActionCacheTest < ActionController::TestCase
   end
 
   def test_action_cache_with_layout_and_layout_cache_false_via_proc
-    get :with_layout_proc_param, params: { layout: false }
     draw do
       get '/action_caching_test/with_layout_proc_param', to: 'action_caching_test#with_layout_proc_param'
     end
 
+    get :with_layout_proc_param, params: { layout: 'false' }
     assert_response :success
     cached_time = content_to_cache
     assert_not_equal cached_time, @response.body
     assert fragment_exist?('hostname.com/action_caching_test/with_layout_proc_param')
 
-    get :with_layout_proc_param, params: { layout: false }
+    get :with_layout_proc_param, params: { layout: 'false' }
     assert_response :success
     assert_not_equal cached_time, @response.body
     assert_equal cached_time, read_fragment('hostname.com/action_caching_test/with_layout_proc_param')
   end
 
   def test_action_cache_with_layout_and_layout_cache_true_via_proc
-    get :with_layout_proc_param, params: { layout: true }
     draw do
       get '/action_caching_test/with_layout_proc_param', to: 'action_caching_test#with_layout_proc_param'
     end
 
+    get :with_layout_proc_param, params: { layout: 'true' }
     assert_response :success
     cached_time = content_to_cache
     assert_not_equal cached_time, @response.body
     assert fragment_exist?('hostname.com/action_caching_test/with_layout_proc_param')
 
-    get :with_layout_proc_param, params: { layout: true }
+    get :with_layout_proc_param, params: { layout: 'true' }
     assert_response :success
     assert_not_equal cached_time, @response.body
     assert_equal @response.body, read_fragment('hostname.com/action_caching_test/with_layout_proc_param')
