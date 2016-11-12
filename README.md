@@ -61,10 +61,11 @@ You can modify the default action cache path by passing a
 `:cache_path` option. This will be passed directly to
 `ActionCachePath.new`. This is handy for actions with
 multiple possible routes that should be cached differently. If a
-block is given, it is called with the current controller instance.
+proc (or an object that responds to `to_proc`) is given, it is
+called with the current controller instance.
 
-And you can also use `:if` (or `:unless`) to pass a
-proc that specifies when the action should be cached.
+And you can also use `:if` (or `:unless`) to control when the action
+should be cached, similar to how you use them with `before_action`.
 
 As of Rails 3.0, you can also pass `:expires_in` with a time
 interval (in seconds) to schedule expiration of the cached item.
@@ -74,22 +75,32 @@ The following example depicts some of the points made above:
     class ListsController < ApplicationController
       before_action :authenticate, except: :public
 
-      caches_page :public
+      # simple fragment cache
+      caches_action :current
 
-      caches_action :index, if: Proc.new do
-        !request.format.json?  # cache if is not a JSON request
-      end
+      # expire cache after an hour
+      caches_action :archived, expires_in: 1.hour
 
-      caches_action :show, cache_path: { project: 1 },
-        expires_in: 1.hour
+      # cache unless it's a JSON request
+      caches_action :index, unless: -> { request.format.json? }
 
-      caches_action :feed, cache_path: Proc.new do
-        if params[:user_id]
-          user_list_url(params[:user_id], params[:id])
-        else
-          list_url(params[:id])
+      # custom cache path
+      caches_action :show, cache_path: { project: 1 }
+
+      # custom cache path with a proc
+      caches_action :history, cache_path: -> { request.domain }
+
+      # custom cache path with a symbol
+      caches_action :feed, cache_path: :user_cache_path
+
+      protected
+        def user_cache_path
+          if params[:user_id]
+            user_list_url(params[:user_id], params[:id])
+          else
+            list_url(params[:id])
+          end
         end
-      end
     end
 
 If you pass `layout: false`, it will only cache your action
