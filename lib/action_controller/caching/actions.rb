@@ -1,4 +1,4 @@
-require 'set'
+require "set"
 
 module ActionController
   module Caching
@@ -10,7 +10,7 @@ module ActionController
     # to execute such action.
     #
     #   class ListsController < ApplicationController
-    #     before_filter :authenticate, except: :public
+    #     before_action :authenticate, except: :public
     #
     #     caches_page   :public
     #     caches_action :index, :show
@@ -35,8 +35,8 @@ module ActionController
     # <tt>http://david.example.com/lists.xml</tt>
     # are treated like separate requests and so are cached separately.
     # Keep in mind when expiring an action cache that
-    # <tt>action: 'lists'</tt> is not the same as
-    # <tt>action: 'lists', format: :xml</tt>.
+    # <tt>action: "lists"</tt> is not the same as
+    # <tt>action: "lists", format: :xml</tt>.
     #
     # You can modify the default action cache path by passing a
     # <tt>:cache_path</tt> option. This will be passed directly to
@@ -66,7 +66,7 @@ module ActionController
     #
     #
     #   class ListsController < ApplicationController
-    #     before_filter :authenticate, except: :public
+    #     before_action :authenticate, except: :public
     #
     #     caches_page :public
     #
@@ -85,7 +85,7 @@ module ActionController
     #       end
     #     end
     #
-    #     caches_action :posts, cache_path: CachePathCreator.new('posts')
+    #     caches_action :posts, cache_path: CachePathCreator.new("posts")
     #   end
     #
     # If you pass <tt>layout: false</tt>, it will only cache your action
@@ -113,12 +113,12 @@ module ActionController
           filter_options = options.extract!(:if, :unless).merge(only: actions)
           cache_options  = options.extract!(:layout, :cache_path).merge(store_options: options)
 
-          around_filter ActionCacheFilter.new(cache_options), filter_options
+          around_action ActionCacheFilter.new(cache_options), filter_options
         end
       end
 
       def _save_fragment(name, options)
-        content = ''
+        content = ""
         response_body.each do |parts|
           content << parts
         end
@@ -173,10 +173,20 @@ module ActionController
             body = controller._save_fragment(cache_path.path, @store_options)
           end
 
-          body = controller.render_to_string(text: body, layout: true) unless cache_layout
+          body = render_to_string(controller, body) unless cache_layout
 
           controller.response_body = body
           controller.content_type = Mime[cache_path.extension || :html]
+        end
+
+        if ActionPack::VERSION::STRING < "4.1"
+          def render_to_string(controller, body)
+            controller.render_to_string(text: body, layout: true)
+          end
+        else
+          def render_to_string(controller, body)
+            controller.render_to_string(plain: body, layout: true)
+          end
         end
       end
 
@@ -193,15 +203,15 @@ module ActionController
             options.reverse_merge!(format: @extension) if options.is_a?(Hash)
           end
 
-          path = controller.url_for(options).split('://', 2).last
+          path = controller.url_for(options).split("://", 2).last
           @path = normalize!(path)
         end
 
       private
         def normalize!(path)
           ext = URI.parser.escape(extension.to_s) if extension
-          path << 'index' if path[-1] == ?/
-          path << ".#{ext}" if extension and !path.split('?', 2).first.ends_with?(".#{ext}")
+          path << "index" if path[-1] == ?/
+          path << ".#{ext}" if extension && !path.split("?", 2).first.ends_with?(".#{ext}")
           URI.parser.unescape(path)
         end
       end
