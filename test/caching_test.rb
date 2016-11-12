@@ -48,6 +48,7 @@ class ActionCachingTestController < CachingController
   caches_action :record_not_found, :four_oh_four, :simple_runtime_error
   caches_action :streaming
   caches_action :invalid
+  caches_action :accept
 
   layout "talk_from_action"
 
@@ -132,6 +133,27 @@ class ActionCachingTestController < CachingController
     end
   end
 
+  def accept
+    @cache_this = MockTime.now.to_f.to_s
+
+    respond_to do |format|
+      format.html { render html: @cache_this }
+      format.json { render json: @cache_this }
+    end
+  end
+
+  def expire_accept
+    if params.key?(:format)
+      expire_action action: "accept", format: params[:format]
+    elsif !request.format.html?
+      expire_action action: "accept", format: request.format.to_sym
+    else
+      expire_action action: "accept"
+    end
+
+    head :ok
+  end
+
   protected
     def cache_path_protected_method
       ["controller", params[:id]].compact.join("-")
@@ -141,6 +163,10 @@ class ActionCachingTestController < CachingController
       def render(options)
         if options.key?(:plain)
           super({ text: options.delete(:plain) }.merge(options))
+          response.content_type = "text/plain"
+        elsif options.key?(:html)
+          super({ text: options.delete(:html) }.merge(options))
+          response.content_type = "text/html"
         else
           super
         end
@@ -321,7 +347,7 @@ class ActionCacheTest < ActionController::TestCase
       get "/action_caching_test", to: "action_caching_test#index"
     end
 
-    @request.env["HTTP_ACCEPT"] = "application/json"
+    @request.accept = "application/json"
     get :index
     assert_response :success
     assert !fragment_exist?("hostname.com/action_caching_test")
@@ -700,7 +726,113 @@ class ActionCacheTest < ActionController::TestCase
     assert_response :not_acceptable
   end
 
+  def test_format_from_accept_header
+    draw do
+      get "/action_caching_test/accept", to: "action_caching_test#accept"
+      get "/action_caching_test/accept/expire", to: "action_caching_test#expire_accept"
+    end
+
+    # Cache the JSON format
+    get_json :accept
+    json_cached_time = content_to_cache
+    assert_cached json_cached_time, "application/json"
+
+    # Check that the JSON format is cached
+    get_json :accept
+    assert_cached json_cached_time, "application/json"
+
+    # Cache the HTML format
+    get_html :accept
+    html_cached_time = content_to_cache
+    assert_cached html_cached_time
+
+    # Check that it's not the JSON format
+    assert_not_equal json_cached_time, @response.body
+
+    # Check that the HTML format is cached
+    get_html :accept
+    assert_cached html_cached_time
+
+    # Check that the JSON format is still cached
+    get_json :accept
+    assert_cached json_cached_time, "application/json"
+
+    # Expire the JSON format
+    get_json :expire_accept
+    assert_response :success
+
+    # Check that the HTML format is still cached
+    get_html :accept
+    assert_cached html_cached_time
+
+    # Check the JSON format was expired
+    get_json :accept
+    new_json_cached_time = content_to_cache
+    assert_cached new_json_cached_time, "application/json"
+    assert_not_equal json_cached_time, @response.body
+
+    # Expire the HTML format
+    get_html :expire_accept
+    assert_response :success
+
+    # Check that the JSON format is still cached
+    get_json :accept
+    assert_cached new_json_cached_time, "application/json"
+
+    # Check the HTML format was expired
+    get_html :accept
+    new_html_cached_time = content_to_cache
+    assert_cached new_html_cached_time
+    assert_not_equal html_cached_time, @response.body
+  end
+
+  def test_explicit_html_format_is_used_for_fragment_path
+    draw do
+      get "/action_caching_test/accept", to: "action_caching_test#accept"
+      get "/action_caching_test/accept/expire", to: "action_caching_test#expire_accept"
+    end
+
+    get :accept, format: "html"
+    cached_time = content_to_cache
+    assert_cached cached_time
+
+    assert fragment_exist?("hostname.com/action_caching_test/accept.html")
+
+    get :accept, format: "html"
+    cached_time = content_to_cache
+    assert_cached cached_time
+
+    get :expire_accept, format: "html"
+    assert_response :success
+
+    assert !fragment_exist?("hostname.com/action_caching_test/accept.html")
+
+    get :accept, format: "html"
+    assert_not_cached cached_time
+  end
+
   private
+    def get_html(*args)
+      @request.accept = "text/html"
+      get(*args)
+    end
+
+    def get_json(*args)
+      @request.accept = "application/json"
+      get(*args)
+    end
+
+    def assert_cached(cache_time, content_type = "text/html")
+      assert_response :success
+      assert_equal cache_time, @response.body
+      assert_equal content_type, @response.content_type
+    end
+
+    def assert_not_cached(cache_time, content_type = "text/html")
+      assert_response :success
+      assert_not_equal cache_time, @response.body
+      assert_equal content_type, @response.content_type
+    end
 
     def content_to_cache
       @controller.instance_variable_get(:@cache_this)

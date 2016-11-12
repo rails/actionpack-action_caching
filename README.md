@@ -106,15 +106,12 @@ The following example depicts some of the points made above:
 If you pass `layout: false`, it will only cache your action
 content. That's useful when your layout has dynamic information.
 
-Warning: If the format of the request is determined by the Accept HTTP
-header the Content-Type of the cached response could be wrong because
-no information about the MIME type is stored in the cache key. So, if
-you first ask for MIME type M in the Accept header, a cache entry is
-created, and then perform a second request to the same resource asking
-for a different MIME type, you'd get the content cached for M.
-
-The `:format` parameter is taken into account though. The safest
-way to cache by MIME type is to pass the format in the route.
+Note: Both the `:format` param and the `Accept` header are taken
+into account when caching the fragment with the `:format` having
+precedence. For backwards compatibility when the `Accept` header
+indicates a HTML request the fragment is stored without the
+extension but if an explicit `"html"` is passed in `:format` then
+that _is_ used for storing the fragment.
 
 Contributing
 ------------
