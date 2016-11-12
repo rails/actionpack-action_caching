@@ -82,7 +82,7 @@ class ActionCachingTestController < CachingController
   end
 
   def not_url_cache_path
-    render text: 'cache_this'
+    render plain: 'cache_this'
   end
 
   def record_not_found
@@ -136,6 +136,16 @@ class ActionCachingTestController < CachingController
 
   def cache_path_protected_method
     ['controller', params[:id]].compact.join('-')
+  end
+
+  if ActionPack::VERSION::STRING < "4.1"
+    def render(options)
+      if options.key?(:plain)
+        super({ text: options.delete(:plain) }.merge(options))
+      else
+        super
+      end
+    end
   end
 end
 
