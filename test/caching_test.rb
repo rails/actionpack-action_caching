@@ -27,9 +27,6 @@ class ActionCachingTestController < CachingController
 
   self.view_paths = FIXTURE_LOAD_PATH
 
-  # Eliminate uninitialized ivar warning
-  before_action { @title = nil }
-
   before_action only: :with_symbol_format do
     request.params[:format] = :json
   end
@@ -68,8 +65,7 @@ class ActionCachingTestController < CachingController
 
   def with_layout
     @cache_this = MockTime.now.to_f.to_s
-    @title = nil
-    render plain: @cache_this, layout: true
+    render html: @cache_this, layout: true
   end
 
   def with_format_and_http_param
@@ -198,7 +194,7 @@ class ActionCachingMockController
   end
 
   def request
-    Object.new.instance_eval(<<-EVAL)
+    Object.new.instance_eval <<-EVAL
       def path; "#{@mock_path}" end
       def format; "all" end
       def parameters; { format: nil }; end
@@ -296,15 +292,15 @@ class ActionCacheTest < ActionController::TestCase
       get "/action_caching_test/layout_false", to: "action_caching_test#layout_false"
     end
 
-    get :layout_false
+    get :layout_false, params: { title: "Request 1" }
     assert_response :success
     cached_time = content_to_cache
-    assert_not_equal cached_time, @response.body
-    assert fragment_exist?("hostname.com/action_caching_test/layout_false")
+    assert_equal "<title>Request 1</title>\n#{cached_time}", @response.body
+    assert_equal cached_time, read_fragment("hostname.com/action_caching_test/layout_false")
 
-    get :layout_false
+    get :layout_false, params: { title: "Request 2" }
     assert_response :success
-    assert_not_equal cached_time, @response.body
+    assert_equal "<title>Request 2</title>\n#{cached_time}", @response.body
     assert_equal cached_time, read_fragment("hostname.com/action_caching_test/layout_false")
   end
 
@@ -313,15 +309,15 @@ class ActionCacheTest < ActionController::TestCase
       get "/action_caching_test/with_layout_proc_param", to: "action_caching_test#with_layout_proc_param"
     end
 
-    get :with_layout_proc_param, params: { layout: "false" }
+    get :with_layout_proc_param, params: { title: "Request 1", layout: "false" }
     assert_response :success
     cached_time = content_to_cache
-    assert_not_equal cached_time, @response.body
-    assert fragment_exist?("hostname.com/action_caching_test/with_layout_proc_param")
+    assert_equal "<title>Request 1</title>\n#{cached_time}", @response.body
+    assert_equal cached_time, read_fragment("hostname.com/action_caching_test/with_layout_proc_param")
 
-    get :with_layout_proc_param, params: { layout: "false" }
+    get :with_layout_proc_param, params: { title: "Request 2", layout: "false" }
     assert_response :success
-    assert_not_equal cached_time, @response.body
+    assert_equal "<title>Request 2</title>\n#{cached_time}", @response.body
     assert_equal cached_time, read_fragment("hostname.com/action_caching_test/with_layout_proc_param")
   end
 
@@ -330,16 +326,16 @@ class ActionCacheTest < ActionController::TestCase
       get "/action_caching_test/with_layout_proc_param", to: "action_caching_test#with_layout_proc_param"
     end
 
-    get :with_layout_proc_param, params: { layout: "true" }
+    get :with_layout_proc_param, params: { title: "Request 1", layout: "true" }
     assert_response :success
     cached_time = content_to_cache
-    assert_not_equal cached_time, @response.body
-    assert fragment_exist?("hostname.com/action_caching_test/with_layout_proc_param")
+    assert_equal "<title>Request 1</title>\n#{cached_time}", @response.body
+    assert_equal "<title>Request 1</title>\n#{cached_time}", read_fragment("hostname.com/action_caching_test/with_layout_proc_param")
 
-    get :with_layout_proc_param, params: { layout: "true" }
+    get :with_layout_proc_param, params: { title: "Request 2", layout: "true" }
     assert_response :success
-    assert_not_equal cached_time, @response.body
-    assert_equal @response.body, read_fragment("hostname.com/action_caching_test/with_layout_proc_param")
+    assert_equal "<title>Request 1</title>\n#{cached_time}", @response.body
+    assert_equal "<title>Request 1</title>\n#{cached_time}", read_fragment("hostname.com/action_caching_test/with_layout_proc_param")
   end
 
   def test_action_cache_conditional_options

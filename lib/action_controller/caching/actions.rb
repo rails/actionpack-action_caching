@@ -185,7 +185,7 @@ module ActionController
           end
         else
           def render_to_string(controller, body)
-            controller.render_to_string(plain: body, layout: true)
+            controller.render_to_string(html: body, layout: true)
           end
         end
       end
