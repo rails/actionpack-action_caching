@@ -1,3 +1,8 @@
+*   The options `:layout` and `:cache_path` now behave the same when
+    passed a `Symbol`, `Proc` or object that responds to call.
+
+    *Andrew White*
+
 *   Respect `Accept` header when caching actions
 
     Fixes #18.

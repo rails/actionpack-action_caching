@@ -152,16 +152,8 @@ module ActionController
         end
 
         def around(controller)
-          cache_layout = @cache_layout.respond_to?(:call) ? @cache_layout.call(controller) : @cache_layout
-
-          path_options = if @cache_path.is_a?(Proc) || @cache_path.respond_to?(:to_proc)
-            controller.instance_exec(controller, &@cache_path)
-          elsif @cache_path.respond_to?(:call)
-            @cache_path.call(controller)
-          else
-            @cache_path
-          end
-
+          cache_layout = expand_option(controller, @cache_layout)
+          path_options = expand_option(controller, @cache_path)
           cache_path = ActionCachePath.new(controller, path_options || {})
 
           body = controller.read_fragment(cache_path.path, @store_options)
@@ -188,6 +180,17 @@ module ActionController
             controller.render_to_string(html: body, layout: true)
           end
         end
+
+        private
+          def expand_option(controller, option)
+            if option.is_a?(Proc) || option.respond_to?(:to_proc)
+              controller.instance_exec(controller, &option)
+            elsif option.respond_to?(:call)
+              option.call(controller)
+            else
+              option
+            end
+          end
       end
 
       class ActionCachePath
