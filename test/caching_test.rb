@@ -811,16 +811,21 @@ class ActionCacheTest < ActionController::TestCase
     assert_not_cached cached_time
   end
 
-  def test_lambda_arity
+  def test_lambda_arity_with_cache_path
     draw do
       get "/action_caching_test/not_url_cache_path_no_args", to: "action_caching_test#not_url_cache_path_no_args"
-      get "/action_caching_test/with_layout_proc_param_no_args", to: "action_caching_test#with_layout_proc_param_no_args"
     end
 
     get :not_url_cache_path_no_args
     assert_response :success
     assert !fragment_exist?("test.host/action_caching_test/not_url_cache_path_no_args")
     assert fragment_exist?("not_url_cache_path_no_args_key")
+  end
+
+  def test_lambda_arity_with_layout
+    draw do
+      get "/action_caching_test/with_layout_proc_param_no_args", to: "action_caching_test#with_layout_proc_param_no_args"
+    end
 
     get :with_layout_proc_param_no_args, params: { title: "Request 1", layout: "false" }
     assert_response :success
