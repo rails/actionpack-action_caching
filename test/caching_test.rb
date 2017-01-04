@@ -40,8 +40,10 @@ class ActionCachingTestController < CachingController
   caches_action :with_format_and_http_param, cache_path: ->(c) { { key: "value" } }
   caches_action :with_symbol_format, cache_path: "http://test.host/action_caching_test/with_symbol_format"
   caches_action :not_url_cache_path, cache_path: ->(c) { "#{c.params[:action]}_key" }
+  caches_action :not_url_cache_path_no_args, cache_path: -> { "#{params[:action]}_key" }
   caches_action :layout_false, layout: false
   caches_action :with_layout_proc_param, layout: ->(c) { c.params[:layout] != "false" }
+  caches_action :with_layout_proc_param_no_args, layout: -> { params[:layout] != "false" }
   caches_action :record_not_found, :four_oh_four, :simple_runtime_error
   caches_action :streaming
   caches_action :invalid
@@ -81,6 +83,7 @@ class ActionCachingTestController < CachingController
   def not_url_cache_path
     render plain: "cache_this"
   end
+  alias_method :not_url_cache_path_no_args, :not_url_cache_path
 
   def record_not_found
     raise ActiveRecord::RecordNotFound, "oops!"
@@ -101,6 +104,7 @@ class ActionCachingTestController < CachingController
   alias_method :symbol_cache_path, :index
   alias_method :layout_false, :with_layout
   alias_method :with_layout_proc_param, :with_layout
+  alias_method :with_layout_proc_param_no_args, :with_layout
 
   def expire
     expire_action controller: "action_caching_test", action: "index"
@@ -805,6 +809,29 @@ class ActionCacheTest < ActionController::TestCase
 
     get :accept, format: "html"
     assert_not_cached cached_time
+  end
+
+  def test_lambda_arity
+    draw do
+      get "/action_caching_test/not_url_cache_path_no_args", to: "action_caching_test#not_url_cache_path_no_args"
+      get "/action_caching_test/with_layout_proc_param_no_args", to: "action_caching_test#with_layout_proc_param_no_args"
+    end
+
+    get :not_url_cache_path_no_args
+    assert_response :success
+    assert !fragment_exist?("test.host/action_caching_test/not_url_cache_path_no_args")
+    assert fragment_exist?("not_url_cache_path_no_args_key")
+
+    get :with_layout_proc_param_no_args, params: { title: "Request 1", layout: "false" }
+    assert_response :success
+    cached_time = content_to_cache
+    assert_equal "<title>Request 1</title>\n#{cached_time}", @response.body
+    assert_equal cached_time, read_fragment("hostname.com/action_caching_test/with_layout_proc_param_no_args")
+
+    get :with_layout_proc_param_no_args, params: { title: "Request 2", layout: "false" }
+    assert_response :success
+    assert_equal "<title>Request 2</title>\n#{cached_time}", @response.body
+    assert_equal cached_time, read_fragment("hostname.com/action_caching_test/with_layout_proc_param_no_args")
   end
 
   private

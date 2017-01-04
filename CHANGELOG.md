@@ -1,3 +1,9 @@
+*   Support proc options with zero arguments
+
+    Fixes #40.
+
+    *Andrew White*
+
 *   The options `:layout` and `:cache_path` now behave the same when
     passed a `Symbol`, `Proc` or object that responds to call.
 

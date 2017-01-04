@@ -183,8 +183,17 @@ module ActionController
 
         private
           def expand_option(controller, option)
-            if option.is_a?(Proc) || option.respond_to?(:to_proc)
-              controller.instance_exec(controller, &option)
+            option = option.to_proc if option.respond_to?(:to_proc)
+
+            if option.is_a?(Proc)
+              case option.arity
+              when -2, -1, 1
+                controller.instance_exec(controller, &option)
+              when 0
+                controller.instance_exec(&option)
+              else
+                raise ArgumentError, "Invalid proc arity of #{option.arity} - proc options should have an arity of 0 or 1"
+              end
             elsif option.respond_to?(:call)
               option.call(controller)
             else
