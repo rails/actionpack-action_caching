@@ -1,3 +1,5 @@
+## 1.2.0 (January 23, 2014)
+
 *   Support proc options with zero arguments
 
     Fixes #40.
