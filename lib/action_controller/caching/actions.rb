@@ -124,7 +124,8 @@ module ActionController
         end
 
         if caching_allowed?
-          write_fragment(name, content, options)
+          result = write_fragment(name, content, options)
+          result.respond_to?(:html_safe) ? result.html_safe : result
         else
           content
         end
