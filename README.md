@@ -8,7 +8,9 @@ Installation
 
 Add this line to your application's Gemfile:
 
-    gem "actionpack-action_caching"
+```ruby
+gem 'actionpack-action_caching'
+```
 
 And then execute:
 
@@ -28,12 +30,14 @@ that filters run before the cache is served, which allows for
 authentication and other restrictions on whether someone is allowed
 to execute such action.
 
-    class ListsController < ApplicationController
-      before_action :authenticate, except: :public
+```ruby
+class ListsController < ApplicationController
+  before_action :authenticate, except: :public
 
-      caches_page   :public
-      caches_action :index, :show
-    end
+  caches_page   :public
+  caches_action :index, :show
+end
+```
 
 In this example, the `public` action doesn't require authentication
 so it's possible to use the faster page caching. On the other hand
@@ -72,36 +76,38 @@ interval (in seconds) to schedule expiration of the cached item.
 
 The following example depicts some of the points made above:
 
-    class ListsController < ApplicationController
-      before_action :authenticate, except: :public
+```ruby
+class ListsController < ApplicationController
+  before_action :authenticate, except: :public
 
-      # simple fragment cache
-      caches_action :current
+  # simple fragment cache
+  caches_action :current
 
-      # expire cache after an hour
-      caches_action :archived, expires_in: 1.hour
+  # expire cache after an hour
+  caches_action :archived, expires_in: 1.hour
 
-      # cache unless it's a JSON request
-      caches_action :index, unless: -> { request.format.json? }
+  # cache unless it's a JSON request
+  caches_action :index, unless: -> { request.format.json? }
 
-      # custom cache path
-      caches_action :show, cache_path: { project: 1 }
+  # custom cache path
+  caches_action :show, cache_path: { project: 1 }
 
-      # custom cache path with a proc
-      caches_action :history, cache_path: -> { request.domain }
+  # custom cache path with a proc
+  caches_action :history, cache_path: -> { request.domain }
 
-      # custom cache path with a symbol
-      caches_action :feed, cache_path: :user_cache_path
+  # custom cache path with a symbol
+  caches_action :feed, cache_path: :user_cache_path
 
-      protected
-        def user_cache_path
-          if params[:user_id]
-            user_list_url(params[:user_id], params[:id])
-          else
-            list_url(params[:id])
-          end
-        end
+  protected
+    def user_cache_path
+      if params[:user_id]
+        user_list_url(params[:user_id], params[:id])
+      else
+        list_url(params[:id])
+      end
     end
+end
+```
 
 If you pass `layout: false`, it will only cache your action
 content. That's useful when your layout has dynamic information.
