@@ -168,7 +168,7 @@ module ActionController
           body = render_to_string(controller, body) unless cache_layout
 
           controller.response_body = body
-          controller.content_type = Mime[cache_path.extension || :html]
+          controller.content_type = controller.request.format
         end
 
         if ActionPack::VERSION::STRING < "4.1"
