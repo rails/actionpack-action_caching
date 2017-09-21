@@ -119,6 +119,10 @@ indicates a HTML request the fragment is stored without the
 extension but if an explicit `"html"` is passed in `:format` then
 that _is_ used for storing the fragment.
 
+If you would like your cache to be regenerated on-demand without
+first clearing it, you can append a `cache=force` param to your
+URL (ex: `http://mysite.com/videos/list?cache=force`).
+
 Contributing
 ------------
 
