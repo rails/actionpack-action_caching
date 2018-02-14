@@ -10,10 +10,11 @@ before_install:
 rvm:
   - 1.9.3
   - 2.0.0
-  - 2.1.9
-  - 2.2.6
-  - 2.3.3
-  - 2.4.0
+  - 2.1.10
+  - 2.2.9
+  - 2.3.6
+  - 2.4.3
+  - 2.5.0
 
 gemfile:
   - Gemfile
@@ -31,23 +32,27 @@ matrix:
       gemfile: Gemfile
     - rvm: 2.0.0
       gemfile: Gemfile
-    - rvm: 2.1.9
+    - rvm: 2.1.10
       gemfile: Gemfile
     - rvm: 1.9.3
       gemfile: gemfiles/Gemfile-5-0-stable
     - rvm: 2.0.0
       gemfile: gemfiles/Gemfile-5-0-stable
-    - rvm: 2.1.9
+    - rvm: 2.1.10
       gemfile: gemfiles/Gemfile-5-0-stable
     - rvm: 1.9.3
       gemfile: gemfiles/Gemfile-edge
     - rvm: 2.0.0
       gemfile: gemfiles/Gemfile-edge
-    - rvm: 2.1.9
+    - rvm: 2.1.10
       gemfile: gemfiles/Gemfile-edge
-    - rvm: 2.4.0
+    - rvm: 2.4.3
       gemfile: gemfiles/Gemfile-4-0-stable
-    - rvm: 2.4.0
+    - rvm: 2.4.3
+      gemfile: gemfiles/Gemfile-4-1-stable
+    - rvm: 2.5.0
+      gemfile: gemfiles/Gemfile-4-0-stable
+    - rvm: 2.5.0
       gemfile: gemfiles/Gemfile-4-1-stable
 
 notifications:
