@@ -14,7 +14,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.license       = "MIT"
 
-  gem.add_dependency "actionpack", ">= 4.0.0", "< 7"
+  gem.add_dependency "actionpack", ">= 4.0.0"
 
   gem.add_development_dependency "mocha"
   gem.add_development_dependency "activerecord", ">= 4.0.0", "< 7"
