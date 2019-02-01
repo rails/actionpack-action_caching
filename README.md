@@ -74,6 +74,9 @@ should be cached, similar to how you use them with `before_action`.
 As of Rails 3.0, you can also pass `:expires_in` with a time
 interval (in seconds) to schedule expiration of the cached item.
 
+Finally, note that only `before_action` filters that are listed
+before `caches_action` will be run when serving from the cache.
+
 The following example depicts some of the points made above:
 
 ```ruby
@@ -97,6 +100,9 @@ class ListsController < ApplicationController
 
   # custom cache path with a symbol
   caches_action :feed, cache_path: :user_cache_path
+  
+  # this filter will not run when serving from the cache
+  before_action :set_some_value_in_session
 
   protected
     def user_cache_path
