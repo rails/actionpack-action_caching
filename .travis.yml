@@ -23,6 +23,7 @@ gemfile:
   - gemfiles/Gemfile-4-1-stable
   - gemfiles/Gemfile-4-2-stable
   - gemfiles/Gemfile-5-0-stable
+  - gemfiles/Gemfile-5-1-stable
   - gemfiles/Gemfile-edge
 
 matrix:
@@ -37,10 +38,16 @@ matrix:
       gemfile: Gemfile
     - rvm: 1.9.3
       gemfile: gemfiles/Gemfile-5-0-stable
+    - rvm: 1.9.3
+      gemfile: gemfiles/Gemfile-5-1-stable
     - rvm: 2.0.0
       gemfile: gemfiles/Gemfile-5-0-stable
+    - rvm: 2.0.0
+      gemfile: gemfiles/Gemfile-5-1-stable
     - rvm: 2.1.10
       gemfile: gemfiles/Gemfile-5-0-stable
+    - rvm: 2.1.10
+      gemfile: gemfiles/Gemfile-5-1-stable
     - rvm: 1.9.3
       gemfile: gemfiles/Gemfile-edge
     - rvm: 2.0.0
