@@ -47,6 +47,12 @@ matrix:
       gemfile: gemfiles/Gemfile-edge
     - rvm: 2.1.10
       gemfile: gemfiles/Gemfile-edge
+    - rvm: 2.2.10
+      gemfile: gemfiles/Gemfile-edge
+    - rvm: 2.3.8
+      gemfile: gemfiles/Gemfile-edge
+    - rvm: 2.4.6
+      gemfile: gemfiles/Gemfile-edge
     - rvm: 2.4.6
       gemfile: gemfiles/Gemfile-4-0-stable
     - rvm: 2.4.6
