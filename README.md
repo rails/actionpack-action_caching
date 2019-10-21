@@ -94,6 +94,8 @@ class ListsController < ApplicationController
 
   # custom cache path with a proc
   caches_action :history, cache_path: -> { request.domain }
+  
+  caches_action :show, version: -> { @list.cache_version }
 
   # custom cache path with a symbol
   caches_action :feed, cache_path: :user_cache_path
