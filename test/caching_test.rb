@@ -871,7 +871,7 @@ class ActionCacheTest < ActionController::TestCase
       if @response.respond_to?(:media_type)
         assert_equal media_type, @response.media_type
       else
-        assert_equal media_type, @response.contenty_type
+        assert_equal media_type, @response.content_type
       end
     end
 
@@ -882,7 +882,7 @@ class ActionCacheTest < ActionController::TestCase
       if @response.respond_to?(:media_type)
         assert_equal media_type, @response.media_type
       else
-        assert_equal media_type, @response.contenty_type
+        assert_equal media_type, @response.content_type
       end
     end
 
