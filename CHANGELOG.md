@@ -1,3 +1,14 @@
+## 1.2.1 (November 12, 2019)
+
+*   Fix HTML escaping when `:layout` is `false`.
+
+    *Anton Katunin*
+
+*   Add support to Rails 6.
+
+    *Jacob Bednarz*
+
+
 ## 1.2.0 (January 23, 2017)
 
 *   Support proc options with zero arguments
