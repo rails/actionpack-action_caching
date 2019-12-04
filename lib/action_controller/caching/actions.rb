@@ -229,8 +229,15 @@ module ActionController
       private
         def normalize!(path)
           ext = URI.parser.escape(extension.to_s) if extension
-          path << "index" if path[-1] == ?/
-          path << ".#{ext}" if extension && !path.split("?", 2).first.ends_with?(".#{ext}")
+          path << 'index' if path[-1] == '/'
+          if extension
+            s_path = path.split('?', 2)
+            unless s_path[0].ends_with?(".#{ext}")
+              s_path[0] << ".#{ext}"
+              path = s_path[0]
+              path << "?#{s_path[1]}" unless s_path[1].nil?
+            end
+          end
           URI.parser.unescape(path)
         end
       end
