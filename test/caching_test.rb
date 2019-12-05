@@ -53,7 +53,7 @@ class ActionCachingTestController < CachingController
   layout "talk_from_action"
 
   def index
-    @cache_this = MockTime.now.to_f.to_s
+    @cache_this = CacheContent.to_s
     render plain: @cache_this
   end
 
@@ -67,17 +67,17 @@ class ActionCachingTestController < CachingController
   end
 
   def with_layout
-    @cache_this = MockTime.now.to_f.to_s
+    @cache_this = CacheContent.to_s
     render html: @cache_this, layout: true
   end
 
   def with_format_and_http_param
-    @cache_this = MockTime.now.to_f.to_s
+    @cache_this = CacheContent.to_s
     render plain: @cache_this
   end
 
   def with_symbol_format
-    @cache_this = MockTime.now.to_f.to_s
+    @cache_this = CacheContent.to_s
     render json: { timestamp: @cache_this }
   end
 
@@ -127,7 +127,7 @@ class ActionCachingTestController < CachingController
   end
 
   def invalid
-    @cache_this = MockTime.now.to_f.to_s
+    @cache_this = CacheContent.to_s
 
     respond_to do |format|
       format.json { render json: @cache_this }
@@ -135,7 +135,7 @@ class ActionCachingTestController < CachingController
   end
 
   def accept
-    @cache_this = MockTime.now.to_f.to_s
+    @cache_this = CacheContent.to_s
 
     respond_to do |format|
       format.html { render html: @cache_this }
@@ -180,10 +180,11 @@ class ActionCachingTestController < CachingController
     end
 end
 
-class MockTime < Time
-  # Let Time spicy to assure that Time.now != Time.now
-  def to_f
-    super + rand
+class CacheContent
+  def self.to_s
+    # Let Time spicy to assure that Time.now != Time.now
+    time = Time.now.to_f + rand
+    (time.to_s + "<div />").html_safe
   end
 end
 
@@ -397,7 +398,7 @@ class ActionCacheTest < ActionController::TestCase
       get "/action_caching_test", to: "action_caching_test#index"
     end
 
-    MockTime.expects(:now).returns(12345).once
+    CacheContent.expects(:to_s).returns('12345.0').once
     @controller.expects(:read_fragment).with("hostname.com/action_caching_test", expires_in: 1.hour).once
     @controller.expects(:write_fragment).with("hostname.com/action_caching_test", "12345.0", expires_in: 1.hour).once
     get :index
@@ -588,9 +589,7 @@ class ActionCacheTest < ActionController::TestCase
     assert fragment_exist?("hostname.com/action_caching_test/index.xml")
 
     get :index, format: "xml"
-    assert_response :success
-    assert_equal cached_time, @response.body
-    assert_equal "application/xml", @response.content_type
+    assert_cached(cached_time, "application/xml")
 
     get :expire_xml
     assert_response :success
@@ -609,7 +608,12 @@ class ActionCacheTest < ActionController::TestCase
     get :index, params: { id: "content-type" }, format: "xml"
     get :index, params: { id: "content-type" }, format: "xml"
     assert_response :success
-    assert_equal "application/xml", @response.content_type
+
+    if @response.respond_to?(:media_type)
+      assert_equal "application/xml", @response.media_type
+    else
+      assert_equal "application/xml", @response.content_type
+    end
   end
 
   def test_correct_content_type_is_returned_for_cache_hit_on_action_with_string_key
@@ -621,7 +625,12 @@ class ActionCacheTest < ActionController::TestCase
     get :show, format: "xml"
     get :show, format: "xml"
     assert_response :success
-    assert_equal "application/xml", @response.content_type
+
+    if @response.respond_to?(:media_type)
+      assert_equal "application/xml", @response.media_type
+    else
+      assert_equal "application/xml", @response.content_type
+    end
   end
 
   def test_correct_content_type_is_returned_for_cache_hit_on_action_with_string_key_from_proc
@@ -633,7 +642,12 @@ class ActionCacheTest < ActionController::TestCase
     get :edit, params: { id: 1 }, format: "xml"
     get :edit, params: { id: 1 }, format: "xml"
     assert_response :success
-    assert_equal "application/xml", @response.content_type
+
+    if @response.respond_to?(:media_type)
+      assert_equal "application/xml", @response.media_type
+    else
+      assert_equal "application/xml", @response.content_type
+    end
   end
 
   def test_empty_path_is_normalized
@@ -872,16 +886,26 @@ class ActionCacheTest < ActionController::TestCase
       get(*args)
     end
 
-    def assert_cached(cache_time, content_type = "text/html")
+    def assert_cached(cache_time, media_type = "text/html")
       assert_response :success
       assert_equal cache_time, @response.body
-      assert_equal content_type, @response.content_type
+
+      if @response.respond_to?(:media_type)
+        assert_equal media_type, @response.media_type
+      else
+        assert_equal media_type, @response.content_type
+      end
     end
 
-    def assert_not_cached(cache_time, content_type = "text/html")
+    def assert_not_cached(cache_time, media_type = "text/html")
       assert_response :success
       assert_not_equal cache_time, @response.body
-      assert_equal content_type, @response.content_type
+
+      if @response.respond_to?(:media_type)
+        assert_equal media_type, @response.media_type
+      else
+        assert_equal media_type, @response.content_type
+      end
     end
 
     def content_to_cache
