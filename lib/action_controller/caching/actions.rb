@@ -157,7 +157,7 @@ module ActionController
           version = expand_option(controller, @version)
           cache_path = ActionCachePath.new(controller, path_options || {})
 
-          @store_options.merge!(version: version)
+          @store_options.merge!(version: version) if version
 
           body = controller.read_fragment(cache_path.path, @store_options)
 
