@@ -585,9 +585,7 @@ class ActionCacheTest < ActionController::TestCase
     assert fragment_exist?("hostname.com/action_caching_test/index.xml")
 
     get :index, format: "xml"
-    assert_response :success
-    assert_equal cached_time, @response.body
-    assert_match "application/xml", @response.content_type
+    assert_cached(cached_time, "application/xml")
 
     get :expire_xml
     assert_response :success
@@ -606,7 +604,12 @@ class ActionCacheTest < ActionController::TestCase
     get :index, params: { id: "content-type" }, format: "xml"
     get :index, params: { id: "content-type" }, format: "xml"
     assert_response :success
-    assert_match "application/xml", @response.content_type
+
+    if @response.respond_to?(:media_type)
+      assert_equal "application/xml", @response.media_type
+    else
+      assert_equal "application/xml", @response.content_type
+    end
   end
 
   def test_correct_content_type_is_returned_for_cache_hit_on_action_with_string_key
@@ -618,7 +621,12 @@ class ActionCacheTest < ActionController::TestCase
     get :show, format: "xml"
     get :show, format: "xml"
     assert_response :success
-    assert_match "application/xml", @response.content_type
+
+    if @response.respond_to?(:media_type)
+      assert_equal "application/xml", @response.media_type
+    else
+      assert_equal "application/xml", @response.content_type
+    end
   end
 
   def test_correct_content_type_is_returned_for_cache_hit_on_action_with_string_key_from_proc
@@ -630,7 +638,12 @@ class ActionCacheTest < ActionController::TestCase
     get :edit, params: { id: 1 }, format: "xml"
     get :edit, params: { id: 1 }, format: "xml"
     assert_response :success
-    assert_match "application/xml", @response.content_type
+
+    if @response.respond_to?(:media_type)
+      assert_equal "application/xml", @response.media_type
+    else
+      assert_equal "application/xml", @response.content_type
+    end
   end
 
   def test_empty_path_is_normalized
@@ -853,16 +866,26 @@ class ActionCacheTest < ActionController::TestCase
       get(*args)
     end
 
-    def assert_cached(cache_time, content_type = "text/html")
+    def assert_cached(cache_time, media_type = "text/html")
       assert_response :success
       assert_equal cache_time, @response.body
-      assert_match content_type, @response.content_type
+
+      if @response.respond_to?(:media_type)
+        assert_equal media_type, @response.media_type
+      else
+        assert_equal media_type, @response.content_type
+      end
     end
 
-    def assert_not_cached(cache_time, content_type = "text/html")
+    def assert_not_cached(cache_time, media_type = "text/html")
       assert_response :success
       assert_not_equal cache_time, @response.body
-      assert_match content_type, @response.content_type
+
+      if @response.respond_to?(:media_type)
+        assert_equal media_type, @response.media_type
+      else
+        assert_equal media_type, @response.content_type
+      end
     end
 
     def content_to_cache
