@@ -17,6 +17,7 @@ rvm:
   - 2.4.6
   - 2.5.5
   - 2.6.3
+  - 2.7.1
 
 gemfile:
   - Gemfile
@@ -99,6 +100,17 @@ matrix:
       gemfile: gemfiles/Gemfile-5-0-stable
     - rvm: 2.6.3
       gemfile: gemfiles/Gemfile-5-1-stable
+    - rvm: 2.7.1
+      gemfile: gemfiles/Gemfile-4-0-stable
+    - rvm: 2.7.1
+      gemfile: gemfiles/Gemfile-4-1-stable
+    - rvm: 2.7.1
+      gemfile: gemfiles/Gemfile-4-2-stable
+    - rvm: 2.7.1
+      gemfile: gemfiles/Gemfile-5-0-stable
+    - rvm: 2.7.1
+      gemfile: gemfiles/Gemfile-5-1-stable
+
 
 notifications:
   email: false
