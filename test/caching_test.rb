@@ -18,6 +18,12 @@ class CachePath
   end
 end
 
+class ExpiresIn
+  def call(controller)
+    1.hour
+  end
+end
+
 class ActionCachingTestController < CachingController
   rescue_from(Exception) { head 500 }
   rescue_from(ActionController::UnknownFormat) { head :not_acceptable }
@@ -36,6 +42,8 @@ class ActionCachingTestController < CachingController
   caches_action :edit, cache_path: ->(c) { c.params[:id] ? "http://test.host/#{c.params[:id]};edit" : "http://test.host/edit" }
   caches_action :custom_cache_path, cache_path: CachePath.new
   caches_action :symbol_cache_path, cache_path: :cache_path_protected_method
+  caches_action :custom_expires_in, expires_in: ExpiresIn.new
+  caches_action :symbol_expires_in, expires_in: :expires_in_protected_method
   caches_action :with_layout
   caches_action :with_format_and_http_param, cache_path: ->(c) { { key: "value" } }
   caches_action :with_symbol_format, cache_path: "http://test.host/action_caching_test/with_symbol_format"
@@ -102,6 +110,8 @@ class ActionCachingTestController < CachingController
   alias_method :destroy, :index
   alias_method :custom_cache_path, :index
   alias_method :symbol_cache_path, :index
+  alias_method :custom_expires_in, :index
+  alias_method :symbol_expires_in, :index
   alias_method :layout_false, :with_layout
   alias_method :with_layout_proc_param, :with_layout
   alias_method :with_layout_proc_param_no_args, :with_layout
@@ -118,6 +128,16 @@ class ActionCachingTestController < CachingController
 
   def expire_with_url_string
     expire_action url_for(controller: "action_caching_test", action: "index")
+    head :ok
+  end
+
+  def expire_symbol_expires_in
+    expire_action controller: "action_caching_test", action: "symbol_expires_in"
+    head :ok
+  end
+
+  def expire_custom_expires_in
+    expire_action controller: "action_caching_test", action: "custom_expires_in"
     head :ok
   end
 
@@ -157,6 +177,10 @@ class ActionCachingTestController < CachingController
   protected
     def cache_path_protected_method
       ["controller", params[:id]].compact.join("-")
+    end
+
+    def expires_in_protected_method
+      1.hour
     end
 
     if ActionPack::VERSION::STRING < "4.1"
@@ -480,6 +504,60 @@ class ActionCacheTest < ActionController::TestCase
     assert_not_equal cached_time, @response.body
 
     get :index
+    assert_response :success
+    assert_equal new_cached_time, @response.body
+  end
+
+  def test_cache_expiration_with_symbol
+    draw do
+      get "/action_caching_test/symbol_expires_in", to: "action_caching_test#symbol_expires_in"
+      get "/action_caching_test/expire", to: "action_caching_test#expire_symbol_expires_in"
+    end
+
+    get :symbol_expires_in
+    assert_response :success
+    cached_time = content_to_cache
+
+    get :symbol_expires_in
+    assert_response :success
+    assert_equal cached_time, @response.body
+
+    get :expire_symbol_expires_in
+    assert_response :success
+
+    get :symbol_expires_in
+    assert_response :success
+    new_cached_time = content_to_cache
+    assert_not_equal cached_time, @response.body
+
+    get :symbol_expires_in
+    assert_response :success
+    assert_equal new_cached_time, @response.body
+  end
+
+  def test_cache_expiration_with_custom_object
+    draw do
+      get "/action_caching_test/symbol_expires_in", to: "action_caching_test#custom_expires_in"
+      get "/action_caching_test/expire", to: "action_caching_test#expire_custom_expires_in"
+    end
+
+    get :custom_expires_in
+    assert_response :success
+    cached_time = content_to_cache
+
+    get :custom_expires_in
+    assert_response :success
+    assert_equal cached_time, @response.body
+
+    get :expire_custom_expires_in
+    assert_response :success
+
+    get :custom_expires_in
+    assert_response :success
+    new_cached_time = content_to_cache
+    assert_not_equal cached_time, @response.body
+
+    get :custom_expires_in
     assert_response :success
     assert_equal new_cached_time, @response.body
   end
