@@ -231,7 +231,7 @@ module ActionController
           ext = URI.parser.escape(extension.to_s) if extension
           path << "index" if path[-1] == ?/
           path << ".#{ext}" if extension && !path.split("?", 2).first.ends_with?(".#{ext}")
-          URI.parser.unescape(path)
+          URI::DEFAULT_PARSER.unescape(path)
         end
       end
     end
