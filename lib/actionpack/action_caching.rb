@@ -1,1 +1,1 @@
-require "actionpack/action_caching/railtie"
+require "actionpack/action_caching/railtie" if defined?(Rails)
