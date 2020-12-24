@@ -228,7 +228,7 @@ module ActionController
 
       private
         def normalize!(path)
-          ext = URI.parser.escape(extension.to_s) if extension
+          ext = URI::DEFAULT_PARSER.escape(extension.to_s) if extension
           path << "index" if path[-1] == ?/
           path << ".#{ext}" if extension && !path.split("?", 2).first.ends_with?(".#{ext}")
           URI::DEFAULT_PARSER.unescape(path)
