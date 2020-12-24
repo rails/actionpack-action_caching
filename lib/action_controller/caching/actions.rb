@@ -165,7 +165,7 @@ module ActionController
             body = controller._save_fragment(cache_path.path, @store_options)
           end
 
-          body = render_to_string(controller, body) unless cache_layout
+          body = render_to_string(controller, body.respond_to?(:html_safe) ? body.html_safe : body) unless cache_layout
 
           controller.response_body = body
           controller.content_type = Mime[cache_path.extension || :html]
