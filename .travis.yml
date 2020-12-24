@@ -14,9 +14,10 @@ rvm:
   - 2.1.10
   - 2.2.10
   - 2.3.8
-  - 2.4.6
-  - 2.5.5
-  - 2.6.3
+  - 2.4.10
+  - 2.5.8
+  - 2.6.6
+  - 2.7.2
 
 gemfile:
   - Gemfile
@@ -27,6 +28,7 @@ gemfile:
   - gemfiles/Gemfile-5-1-stable
   - gemfiles/Gemfile-5-2-stable
   - gemfiles/Gemfile-6-0-stable
+  - gemfiles/Gemfile-6-1-stable
   - gemfiles/Gemfile-edge
 
 matrix:
@@ -39,6 +41,12 @@ matrix:
       gemfile: Gemfile
     - rvm: 2.1.10
       gemfile: Gemfile
+    - rvm: 2.2.10
+      gemfile: Gemfile
+    - rvm: 2.3.8
+      gemfile: Gemfile
+    - rvm: 2.4.10
+      gemfile: Gemfile
     - rvm: 1.9.3
       gemfile: gemfiles/Gemfile-5-0-stable
     - rvm: 1.9.3
@@ -47,6 +55,8 @@ matrix:
       gemfile: gemfiles/Gemfile-5-2-stable
     - rvm: 1.9.3
       gemfile: gemfiles/Gemfile-6-0-stable
+    - rvm: 1.9.3
+      gemfile: gemfiles/Gemfile-6-1-stable
     - rvm: 2.0.0
       gemfile: gemfiles/Gemfile-5-0-stable
     - rvm: 2.0.0
@@ -55,6 +65,8 @@ matrix:
       gemfile: gemfiles/Gemfile-5-2-stable
     - rvm: 2.0.0
       gemfile: gemfiles/Gemfile-6-0-stable
+    - rvm: 2.0.0
+      gemfile: gemfiles/Gemfile-6-1-stable
     - rvm: 2.1.10
       gemfile: gemfiles/Gemfile-5-0-stable
     - rvm: 2.1.10
@@ -67,8 +79,16 @@ matrix:
       gemfile: gemfiles/Gemfile-6-0-stable
     - rvm: 2.3.8
       gemfile: gemfiles/Gemfile-6-0-stable
-    - rvm: 2.4.6
+    - rvm: 2.4.10
       gemfile: gemfiles/Gemfile-6-0-stable
+    - rvm: 2.1.10
+      gemfile: gemfiles/Gemfile-6-1-stable
+    - rvm: 2.2.10
+      gemfile: gemfiles/Gemfile-6-1-stable
+    - rvm: 2.3.8
+      gemfile: gemfiles/Gemfile-6-1-stable
+    - rvm: 2.4.10
+      gemfile: gemfiles/Gemfile-6-1-stable
     - rvm: 1.9.3
       gemfile: gemfiles/Gemfile-edge
     - rvm: 2.0.0
@@ -79,26 +99,37 @@ matrix:
       gemfile: gemfiles/Gemfile-edge
     - rvm: 2.3.8
       gemfile: gemfiles/Gemfile-edge
-    - rvm: 2.4.6
+    - rvm: 2.4.10
       gemfile: gemfiles/Gemfile-edge
-    - rvm: 2.4.6
+    - rvm: 2.4.10
       gemfile: gemfiles/Gemfile-4-0-stable
-    - rvm: 2.4.6
+    - rvm: 2.4.10
       gemfile: gemfiles/Gemfile-4-1-stable
-    - rvm: 2.5.5
+    - rvm: 2.5.8
       gemfile: gemfiles/Gemfile-4-0-stable
-    - rvm: 2.5.5
+    - rvm: 2.5.8
       gemfile: gemfiles/Gemfile-4-1-stable
-    - rvm: 2.6.3
+    - rvm: 2.6.6
       gemfile: gemfiles/Gemfile-4-0-stable
-    - rvm: 2.6.3
+    - rvm: 2.6.6
       gemfile: gemfiles/Gemfile-4-1-stable
-    - rvm: 2.6.3
+    - rvm: 2.6.6
       gemfile: gemfiles/Gemfile-4-2-stable
-    - rvm: 2.6.3
+    - rvm: 2.6.6
       gemfile: gemfiles/Gemfile-5-0-stable
-    - rvm: 2.6.3
+    - rvm: 2.6.6
       gemfile: gemfiles/Gemfile-5-1-stable
+    - rvm: 2.7.2
+      gemfile: gemfiles/Gemfile-4-0-stable
+    - rvm: 2.7.2
+      gemfile: gemfiles/Gemfile-4-1-stable
+    - rvm: 2.7.2
+      gemfile: gemfiles/Gemfile-4-2-stable
+    - rvm: 2.7.2
+      gemfile: gemfiles/Gemfile-5-0-stable
+    - rvm: 2.7.2
+      gemfile: gemfiles/Gemfile-5-1-stable
+
 
 notifications:
   email: false
