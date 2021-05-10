@@ -1,3 +1,10 @@
+## 1.2.2 (May 10, 2021)
+
+*   Add support for Rails 6.1
+
+    *Jonathan Fleckenstein*, *Prem Sichanugrist*
+
+
 ## 1.2.1 (November 12, 2019)
 
 *   Fix HTML escaping when `:layout` is `false`.
