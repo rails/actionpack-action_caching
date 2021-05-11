@@ -1,5 +1,5 @@
 require "abstract_unit"
-require "mocha/setup"
+require "mocha/minitest"
 
 CACHE_DIR = "test_cache"
 # Don't change "../tmp" cavalierly or you might hose something you don't want hosed
