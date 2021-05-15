@@ -155,14 +155,15 @@ module ActionController
           cache_layout = expand_option(controller, @cache_layout)
           path_options = expand_option(controller, @cache_path)
           cache_path = ActionCachePath.new(controller, path_options || {})
+          store_options = @store_options.transform_values { |value| expand_option(controller, value) }
 
-          body = controller.read_fragment(cache_path.path, @store_options)
+          body = controller.read_fragment(cache_path.path, store_options)
 
           unless body
             controller.action_has_layout = false unless cache_layout
             yield
             controller.action_has_layout = true
-            body = controller._save_fragment(cache_path.path, @store_options)
+            body = controller._save_fragment(cache_path.path, store_options)
           end
 
           body = render_to_string(controller, body) unless cache_layout

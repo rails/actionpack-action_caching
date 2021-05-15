@@ -31,7 +31,8 @@ class ActionCachingTestController < CachingController
     request.params[:format] = :json
   end
 
-  caches_action :index, :redirected, :forbidden, if: ->(c) { c.request.format && !c.request.format.json? }, expires_in: 1.hour
+  caches_action :index, :redirected, :forbidden, if: ->(c) { c.request.format && !c.request.format.json? }
+  caches_action :store_options_index, expires_in: 1.hour, version: -> { 1 }
   caches_action :show, cache_path: "http://test.host/custom/show"
   caches_action :edit, cache_path: ->(c) { c.params[:id] ? "http://test.host/#{c.params[:id]};edit" : "http://test.host/edit" }
   caches_action :custom_cache_path, cache_path: CachePath.new
@@ -105,6 +106,7 @@ class ActionCachingTestController < CachingController
   alias_method :layout_false, :with_layout
   alias_method :with_layout_proc_param, :with_layout
   alias_method :with_layout_proc_param_no_args, :with_layout
+  alias_method :store_options_index, :index
 
   def expire
     expire_action controller: "action_caching_test", action: "index"
@@ -389,13 +391,13 @@ class ActionCacheTest < ActionController::TestCase
 
   def test_action_cache_with_store_options
     draw do
-      get "/action_caching_test", to: "action_caching_test#index"
+      get "/action_caching_test", to: "action_caching_test#store_options_index"
     end
 
     CacheContent.expects(:to_s).returns('12345.0').once
-    @controller.expects(:read_fragment).with("hostname.com/action_caching_test", expires_in: 1.hour).once
-    @controller.expects(:write_fragment).with("hostname.com/action_caching_test", "12345.0", expires_in: 1.hour).once
-    get :index
+    @controller.expects(:read_fragment).with("hostname.com/action_caching_test", expires_in: 1.hour, version: 1).once
+    @controller.expects(:write_fragment).with("hostname.com/action_caching_test", "12345.0", expires_in: 1.hour, version: 1).once
+    get :store_options_index
     assert_response :success
   end
 
