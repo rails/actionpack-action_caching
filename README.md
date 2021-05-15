@@ -73,6 +73,10 @@ should be cached, similar to how you use them with `before_action`.
 
 As of Rails 3.0, you can also pass `:expires_in` with a time
 interval (in seconds) to schedule expiration of the cached item.
+You can also modify the expires in by passing a symbol as `:set_expires_in`.
+This is useful if you need different expire times in your action or if you use
+a concern to set `caches_action` and your controllers must have different
+expire times.
 
 The following example depicts some of the points made above:
 
@@ -85,6 +89,9 @@ class ListsController < ApplicationController
 
   # expire cache after an hour
   caches_action :archived, expires_in: 1.hour
+
+  # custom expire cache
+  caches_action :archived, expires_in: :set_expires_in
 
   # cache unless it's a JSON request
   caches_action :index, unless: -> { request.format.json? }
@@ -104,6 +111,14 @@ class ListsController < ApplicationController
         user_list_url(params[:user_id], params[:id])
       else
         list_url(params[:id])
+      end
+    end
+
+    def set_expires_in
+      if params[:user_id]
+        2.hours
+      else
+        48.hours
       end
     end
 end
