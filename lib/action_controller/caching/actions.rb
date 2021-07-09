@@ -156,7 +156,9 @@ module ActionController
           path_options = expand_option(controller, @cache_path)
           cache_path = ActionCachePath.new(controller, path_options || {})
 
-          body = controller.read_fragment(cache_path.path, @store_options)
+          unless controller.params[:cache] == 'force'
+            body = controller.read_fragment(cache_path.path, @store_options)
+          end
 
           unless body
             controller.action_has_layout = false unless cache_layout

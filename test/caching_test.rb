@@ -48,6 +48,7 @@ class ActionCachingTestController < CachingController
   caches_action :streaming
   caches_action :invalid
   caches_action :accept
+  caches_action :regenerate
 
   layout "talk_from_action"
 
@@ -140,6 +141,11 @@ class ActionCachingTestController < CachingController
       format.html { render html: @cache_this }
       format.json { render json: @cache_this }
     end
+  end
+
+  def regenerate
+    @cache_this = MockTime.now.to_f.to_s
+    render plain: @cache_this
   end
 
   def expire_accept
@@ -851,6 +857,22 @@ class ActionCacheTest < ActionController::TestCase
     assert_response :success
     assert_equal "<title>Request 2</title>\n#{cached_time}", @response.body
     assert_equal cached_time, read_fragment("hostname.com/action_caching_test/with_layout_proc_param_no_args")
+  end
+
+  def test_regenerate_without_expiring
+    draw do
+      get "/action_caching_test/regenerate", to: "action_caching_test#regenerate"
+    end
+
+    get :regenerate
+    cached_time = content_to_cache
+    assert_equal cached_time, @response.body
+    assert fragment_exist?("hostname.com/action_caching_test/regenerate")
+
+    get :regenerate, params: { cache: 'force' }
+    updated_cached_time = content_to_cache
+    assert_equal updated_cached_time, @response.body
+    assert_equal read_fragment("hostname.com/action_caching_test/regenerate"), updated_cached_time
   end
 
   private
