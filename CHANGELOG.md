@@ -1,3 +1,8 @@
+*   Add support for `ActionController::API` controllers
+
+    *fatkodima*
+
+
 ## 1.2.2 (May 10, 2021)
 
 *   Add support for Rails 6.1

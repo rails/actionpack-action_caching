@@ -119,6 +119,28 @@ indicates a HTML request the fragment is stored without the
 extension but if an explicit `"html"` is passed in `:format` then
 that _is_ used for storing the fragment.
 
+`ActionController::API` controllers
+-----
+
+You need to manually include the `ActionController::Caching` module
+and configure it.
+
+```ruby
+class ApplicationController < ActionController::API
+  include ActionController::Caching
+
+  # enable caching
+  self.perform_caching = true
+
+  # configure the cache store (or just use `self.cache_store = Rails.cache`)
+  self.cache_store = :redis_cache_store
+end
+
+class ListsController < ApplicationController
+  caches_action :index, :show
+end
+```
+
 Contributing
 ------------
 
