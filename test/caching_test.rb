@@ -174,6 +174,21 @@ class ActionCachingTestController < CachingController
     end
 end
 
+class APIActionCachingTestController < ActionController::API
+  include ActionController::Caching
+
+  self.perform_caching = true
+  self.cache_store = :file_store, FILE_STORE_PATH
+
+  caches_action :index
+
+  def index
+    render json: { key: "value" }
+  end
+
+  alias_method :destroy, :index
+end
+
 class CacheContent
   def self.to_s
     # Let Time spicy to assure that Time.now != Time.now
@@ -208,7 +223,31 @@ class ActionCachingMockController
   end
 end
 
+module Helpers
+  def fragment_exist?(path)
+    @controller.fragment_exist?(path)
+  end
+
+  def draw(&block)
+    @routes = ActionDispatch::Routing::RouteSet.new
+    @routes.draw(&block)
+    @controller.extend(@routes.url_helpers)
+  end
+
+  if ActionPack::VERSION::STRING < "5.0"
+    def get(action, options = {})
+      format = options.slice(:format)
+      params = options[:params] || {}
+      session = options[:session] || {}
+      flash = options[:flash] || {}
+
+      super(action, params.merge(format), session, flash)
+    end
+  end
+end
+
 class ActionCacheTest < ActionController::TestCase
+  include Helpers
   tests ActionCachingTestController
 
   def setup
@@ -890,28 +929,45 @@ class ActionCacheTest < ActionController::TestCase
       @controller.instance_variable_get(:@cache_this)
     end
 
-    def fragment_exist?(path)
-      @controller.fragment_exist?(path)
-    end
-
     def read_fragment(path)
       @controller.read_fragment(path)
     end
+end
 
-    def draw(&block)
-      @routes = ActionDispatch::Routing::RouteSet.new
-      @routes.draw(&block)
-      @controller.extend(@routes.url_helpers)
+class APIActionCacheTest < ActionController::TestCase
+  include Helpers
+  tests APIActionCachingTestController
+
+  def setup
+    super
+
+    @request.host = "hostname.com"
+    FileUtils.mkdir_p(FILE_STORE_PATH)
+  end
+
+  def teardown
+    super
+    FileUtils.rm_rf(File.dirname(FILE_STORE_PATH))
+  end
+
+  def test_simple_action_cache
+    draw do
+      get "/api_action_caching_test", to: "api_action_caching_test#index"
     end
 
-    if ActionPack::VERSION::STRING < "5.0"
-      def get(action, options = {})
-        format = options.slice(:format)
-        params = options[:params] || {}
-        session = options[:session] || {}
-        flash = options[:flash] || {}
+    get :index
+    assert_response :success
 
-        super(action, params.merge(format), session, flash)
-      end
+    assert fragment_exist?("hostname.com/api_action_caching_test")
+  end
+
+  def test_simple_action_not_cached
+    draw do
+      get "/api_action_caching_test/destroy", to: "api_action_caching_test#destroy"
     end
+
+    get :destroy
+    assert_response :success
+    assert !fragment_exist?("hostname.com/api_action_caching_test/destroy")
+  end
 end

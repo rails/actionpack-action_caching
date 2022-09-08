@@ -159,9 +159,13 @@ module ActionController
           body = controller.read_fragment(cache_path.path, @store_options)
 
           unless body
-            controller.action_has_layout = false unless cache_layout
-            yield
-            controller.action_has_layout = true
+            if controller.respond_to?(:action_has_layout=)
+              controller.action_has_layout = false unless cache_layout
+              yield
+              controller.action_has_layout = true
+            else
+              yield
+            end
             body = controller._save_fragment(cache_path.path, @store_options)
           end
 
