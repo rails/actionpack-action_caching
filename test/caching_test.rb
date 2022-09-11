@@ -813,7 +813,6 @@ class ActionCacheTest < ActionController::TestCase
     assert fragment_exist?("hostname.com/action_caching_test/accept.html")
 
     get :accept, format: "html"
-    cached_time = content_to_cache
     assert_cached cached_time
 
     get :expire_accept, format: "html"
@@ -866,6 +865,7 @@ class ActionCacheTest < ActionController::TestCase
 
     def assert_cached(cache_time, media_type = "text/html")
       assert_response :success
+      assert_not_nil cache_time
       assert_equal cache_time, @response.body
 
       if @response.respond_to?(:media_type)
